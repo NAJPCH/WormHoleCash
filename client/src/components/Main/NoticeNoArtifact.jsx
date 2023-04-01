@@ -1,7 +1,7 @@
 function NoticeNoArtifact() {
   return (
     <p>
-      ⚠️ Cannot find <span className="code">SimpleStorage</span> contract artifact.
+      ⚠️ Cannot find the contract artifact.
     </p>
   );
 }
