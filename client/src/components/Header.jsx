@@ -1,15 +1,16 @@
-import { Flex, Spacer, Heading, Box, Image } from '@chakra-ui/react'
+import { Flex, Spacer, Heading, Box, Image,  } from '@chakra-ui/react'
+import { SunIcon, MoonIcon } from '@chakra-ui/icons'
 
 function Header(connected) {
   return (
   <Flex h='10'>
-    <Box boxSize='100px'>
-      <Image src='https://images.typeform.com/images/k2fUR6ER8DwM' alt='ALYRA' />
+    <Box >
+      <Image src='../../../public/WHC_White.png' alt='WHC' />
     </Box>
     <Spacer />
     <Box><Heading>Worm Hole Cash</Heading></Box>
     <Spacer />
-    <Box></Box>
+    <Box><SunIcon/><MoonIcon/><p>0x123...789</p></Box>
   </Flex>
   );
 }

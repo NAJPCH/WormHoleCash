@@ -8,11 +8,11 @@ function Footer() {
   return (
     <footer>
       <Flex h='10'>
-      <Link uri={"https://github.com/NAJPCH/Project3_PNI_MJO"} text={"GitHub"} />
+      <Link uri={"https://github.com/NAJPCH/WormHoleCash"} text={"GitHub"} />
       <Spacer />
       <Link uri={"https://www.alyra.fr/formations/decouvrir-la-formation-developpeur-blockchain-alyra"} text={"Projet de formation Alyra"} />
       <Spacer />
-      <Link uri={"https://https://www.google.fr/"} text={"Présentation Loom"} />
+      <Link uri={"https://discord.gg/kBmrEy4r"} text={"Discord"} />
       </Flex>
     </footer >
   );
