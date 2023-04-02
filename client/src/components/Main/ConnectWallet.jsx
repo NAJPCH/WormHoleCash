@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { Input, Stack, InputGroup, InputLeftAddon, CheckboxGroup, Checkbox } from '@chakra-ui/react';
-import { Card, CardBody, Heading, Box, Text, StackDivider  } from '@chakra-ui/react'
+import useEth from "../../contexts/EthContext/useEth";
+import { Input, Stack, InputGroup, InputLeftAddon, CheckboxGroup, Checkbox, Center } from '@chakra-ui/react';
+import { Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
 
 const ERC20_ABI = [
   {
@@ -25,6 +26,15 @@ const ConnectWallet = () => {
   const [web3, setWeb3] = useState(null);
   const [account, setAccount] = useState('');
   const [tokenBalances, setTokenBalances] = useState({});
+  //const { state: { contract , accounts, txhash, web3} } = useEth();
+  
+  const {
+    state: { contract, accounts },
+  } = useEth();
+
+  const Selection = async e => { await contract.methods.Selection().send({ from: accounts[0] }); };
+  const Settings = async e => { await contract.methods.Settings().send({ from: accounts[0] });  };
+  const Swap = async e => { await contract.methods.Swap().send({ from: accounts[0] }); };
 
   useEffect(() => {
     const connectMetaMask = async () => {
@@ -74,11 +84,9 @@ const ConnectWallet = () => {
 
   return (
     <div>
-      {account && (
-        <p> <strong>Connected with:</strong> {account} </p>
-      )}
-
-      <Card maxW='md'>
+      {/*account && ( <p> <strong>Connected with:</strong> {account} </p> )*/}
+      <Center>
+      <Card maxW='md' minW='500px'>
       <CardBody>
         
         <Stack divider={<StackDivider />} spacing='2'>
@@ -87,32 +95,53 @@ const ConnectWallet = () => {
             <Heading size='xs' textTransform='uppercase'>Tokens</Heading>
             <CheckboxGroup colorScheme='green'>
               <Stack spacing={[1, 1]} direction={['row', 'column']}>
-                {Object.entries(tokenBalances).map(([address, { name, balance }]) => (
-                  <Checkbox value={address}>{name}: {balance}{/*address*/}</Checkbox> 
-              ))}
+                {Object.entries(tokenBalances).map(([address, { name, balance }]) => (<>
+                   
+                  <InputGroup size='sm'>
+                    
+                    <InputLeftAddon width='80px' children={name} ><Checkbox value={address}>{/*address*/}</Checkbox>{name}</InputLeftAddon>
+                    <Input type='F' placeholder={balance} />
+                  </InputGroup>
+                </>))}
               </Stack>
             </CheckboxGroup>
           </Box>
-
           <Box>
-            <Heading size='xs' textTransform='uppercase'>Adresses </Heading>
-            <Stack spacing={4}>
-              <InputGroup>
-                <p> <strong>Connected with:</strong> {account} </p>
-              </InputGroup>
-              {/* If you add the size prop to `InputGroup`, it'll pass it to all its children. */}
-              <InputGroup size='sm'>
-                <InputLeftAddon children='To' />
-                <Input type='F' placeholder='Put your destination address here' />
-              </InputGroup>
-            </Stack>
-            <Text pt='2' fontSize='sm'>Destination adress must be out of any link from your current address</Text>
+            <Center><Button onClick={Selection}>Selection</Button></Center>
           </Box>
 
         </Stack>
       </CardBody>
     </Card>
+    </Center>
 
+    <Center>
+    <Card maxW='md' minW='500px'>
+      <CardBody>
+        
+        <Stack divider={<StackDivider />} spacing='2'>
+          <Box>
+            <Heading size='xs' textTransform='uppercase'>Adresses </Heading>
+            <Stack spacing={4}>
+              <InputGroup size='sm'>
+                <InputLeftAddon width='60px' children='From' />
+                <Input type='F' isDisabled placeholder={account} />
+              </InputGroup>
+              {/* If you add the size prop to `InputGroup`, it'll pass it to all its children. */}
+              <InputGroup size='sm'>
+                <InputLeftAddon width='60px' children=' To' />
+                <Input type='F' placeholder='Put your destination address here' />
+              </InputGroup>
+            </Stack>
+            <Text as='i' color='tomato' pt='2' fontSize='sm'>Must be out of any link from your current address</Text>
+          </Box>
+          <Box>
+          <Center><Button onClick={Settings}>Settings</Button></Center>
+          </Box>
+
+        </Stack>
+      </CardBody>
+    </Card></Center>
     </div>
   );
 };

@@ -2,14 +2,7 @@
 //import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 pragma solidity 0.8.18;
-/*  Etape 0, préparer toutes les addresses a dispo et les mettre dans les bons champs du contrat
-    https://docs.uniswap.org/contracts/v3/reference/deployments
-    SwapRouter v3: 0xE592427A0AEce92De3Edee1F18E0157C05861564
-    UniswapV2Router02 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D 
-    Link token: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
-    Weth9: 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6
-    DAI: 0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844 */
- 
+
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function approve(address spender, uint256 amount) external returns (bool);
@@ -45,6 +38,7 @@ contract WormHoleCash { // is ReentrancyGuard {
     address public constant SwapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address public constant WETH9 = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
     address public constant DAI = 0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844;
+    address public constant LINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
 
     address public OuputAddress;
     uint public mixingDuration = 1 minutes;
@@ -53,15 +47,16 @@ contract WormHoleCash { // is ReentrancyGuard {
 
 
     struct TokenList {
-        address From;
-        address To;
-        uint8 State; //1=slected 2=Swaped 3=BackSwaped 4=Error je pourais améliorer ça en array outruct ou enum
+        //address From; address To;
+        address Token;
+        uint8 State; //1=selected 2=Swaped 3=BackSwaped 4=Error je pourais améliorer ça en array outruct ou enum
     }
+
     TokenList[] public tokenList;
 
     enum Steps {
         TokenSelection, // sélection des token que l'on souhaite utiliser   
-        Setings,        // Address Output, choix ETH ou StableCOins, Duration, Antropie, nombre de adresse de sortie
+        Settings,        // Address Output, choix ETH ou StableCOins, Duration, Antropie, nombre de adresse de sortie
         Swap,           // Swap sur Uni
         DepositMixer,   // Tornado Cash dépo
         //Waiting,        // Mixage Automation via Gelato
@@ -73,10 +68,13 @@ contract WormHoleCash { // is ReentrancyGuard {
 
     Steps public step;
 
-    event StepChange(
+    event StepChanged(
         Steps previousStatus,
         Steps newStatus
     );
+
+    event TokenListed(TokenList tokenSelected);
+    event OutputAddressSeted(address OuputAddress);
  
     // Pour cet exemple, on va prendre des frais de pool à 0.3%
     uint24 public constant poolFee = 3000;
@@ -87,8 +85,32 @@ contract WormHoleCash { // is ReentrancyGuard {
     constructor() {
         swapRouter = ISwapRouter(SwapRouterV3);
     }
+    //------------------------------------------------------------------ SETTING
+    /*function getOuputAddress() public view returns (address) { return OuputAddress; }
+    function setMixingDuration(uint _mixingDuration) private { mixingDuration = _mixingDuration; }
+    function setEntropy(uint _entropy) private { entropy = _entropy; }   */ 
+
+    function setOuputAddress(address _OuputAddress) private {
+        OuputAddress = _OuputAddress;
+    }
+
+    function addToken(address _token) private {
+        TokenList memory newToken = TokenList(_token, 1);
+        tokenList.push(newToken);
+    }
     
- 
+    function getTokenState(uint256 _index) private view returns (uint8) {
+        require(_index < tokenList.length, "Token index out of bounds");
+        return tokenList[_index].State;
+    }
+    
+    function setTokenState(uint256 _index, uint8 _newState) private {
+        require(_index < tokenList.length, "Token index out of bounds");
+        tokenList[_index].State = _newState;
+    }
+
+
+    //------------------------------------------------------------------ UNISWAP
     function swapExactInputSingle(uint256 amountIn, address _tokenIn, address _tokenOut) public {
         // rajoute un bool SwapBack pour savoir si c'est un swap ou un swapback pour utiliser cette fontion dans les deux sens
         // Transfert des tokens en question au smart contract ! Il faut penser à approve ce transfert avant l’utilisation de cette fonction 
@@ -164,69 +186,63 @@ contract WormHoleCash { // is ReentrancyGuard {
     //------------------------------------------------------------------ WORKFLOW
     //visibilité internal plutôt que private. Cela permettra aux contrats dérivés ou aux contrats de Gelato Network de pouvoir interagir avec ces fonctions.
 
-    function step0RESET() public {
-        step = Steps.TokenSelection;
-   }
+    function changeStep(Steps _from, Steps _to) private{
+        require(step == _from, "changeStep Invalid");
+        step = _to;
+        emit StepChanged(_from, _to);
+    }
+    function RESET() public { step = Steps.TokenSelection; }
 
-    function step1ToSetings() public {
-        require( step == Steps.TokenSelection, "Wrong step" );
-        step = Steps.Setings;
-        emit StepChange( Steps.TokenSelection, Steps.Setings );
+    function getCurrentStep() public view returns (Steps) { return step; }
+
+    function Selection(address _selectedAddress) public {
+        changeStep( Steps.TokenSelection, Steps.Settings );
+        addToken(_selectedAddress);
+    }
+
+    function Settings(address _OuputAddress) public {
+        changeStep( Steps.Settings, Steps.Swap );
+        setOuputAddress(_OuputAddress);
+    }
+
+    function Swap() public {
+        changeStep( Steps.Swap, Steps.DepositMixer );
         //swapOrSwapBack(false, 10000000000000000000, DAI, WETH9);
-   }
-
-    function step2ToSwap() private {
-        //require( step == Steps.Setings, "Wrong step" );
-        step = Steps.Swap;
-        swapOrSwapBack(false, 10000000000000000000, DAI, WETH9);
-        emit StepChange( Steps.Setings, Steps.Swap );
-        step3ToDepositMixer();
+        DepositMixer();
     }
     
-    function step3ToDepositMixer() private {
-        //require( step == Steps.Swap, "Wrong step" );
-        step = Steps.DepositMixer;
-        emit StepChange( Steps.Swap, Steps.DepositMixer );
+    function DepositMixer() private {
+        changeStep( Steps.DepositMixer, Steps.WithdrawMixer );
         depositStartTime = block.timestamp;
-        //step5ToWithdrawMixer(); //TMP skip
+        //step5WithdrawMixer();
     }
         
     // je crois que cette étape est inutile car le star() est dasn la step avant et le require est dans la step d'après
-    /*function step4ToWaiting() public {
+    /*function Waiting() public {
         require( step == Steps.DepositMixer, "Wrong step" );
         step = Steps.Waiting;
         emit StepChange( Steps.DepositMixer, Steps.Waiting );
-        //stepToWithdrawMixer(); //TMP skip
+        //stepWithdrawMixer();
     }*/
 
-   
-    function step5ToWithdrawMixer() public {  //en internal pour l'implementation de Gelato
-        //require( step == Steps.DepositMixer, "Wrong step" );
+    function WithdrawMixer() public {  //en internal pour l'implementation de Gelato
         require(block.timestamp >= depositStartTime + mixingDuration, "You must wait 24h at least");
-        step = Steps.WithdrawMixer;
-        emit StepChange( Steps.DepositMixer, Steps.WithdrawMixer );
-        step6ToFeesServices(); //TMP skip
+        changeStep( Steps.WithdrawMixer, Steps.FeesServices );
+        FeesServices(); 
     }
     
-    function step6ToFeesServices() private {
-        require( step == Steps.WithdrawMixer, "Wrong step" );
-        step = Steps.FeesServices;
-        emit StepChange( Steps.WithdrawMixer, Steps.FeesServices );
-        step7ToSwapBack(); //TMP skip
+    function FeesServices() private {
+        changeStep( Steps.FeesServices, Steps.SwapBack );
+        SwapBack();
     }
     
-    function step7ToSwapBack() private {
-        require( step == Steps.FeesServices, "Wrong step" );
-        step = Steps.SwapBack;
-        emit StepChange( Steps.FeesServices, Steps.SwapBack );
+    function SwapBack() private {
+        changeStep( Steps.SwapBack, Steps.Done );
         swapOrSwapBack(true, 10000000000000000000, WETH9, DAI);
-        step8ToDone(); //TMP skip
+        Done();
     }
     
-    function step8ToDone() private {
-        require( step == Steps.SwapBack, "Wrong step" );
-        step = Steps.Done;
-        emit StepChange( Steps.SwapBack, Steps.Done );
-    }
+    function Done() private { }
+
 
 }
