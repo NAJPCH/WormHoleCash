@@ -1,4 +1,4 @@
-import { Flex, Spacer } from '@chakra-ui/react'
+import { Flex, Spacer, Text } from '@chakra-ui/react'
 
 function Link({ uri, text }) {
   return <a href={uri} target="_blank" rel="noreferrer">{text}</a>;
@@ -9,6 +9,8 @@ function Footer() {
     <footer>
       <Flex h='10'>
       <Link uri={"https://github.com/NAJPCH/WormHoleCash"} text={"GitHub"} />
+      <Spacer />
+      <Text as='samp'>Donation: 0x00000000000000000</Text>
       <Spacer />
       <Link uri={"https://www.alyra.fr/formations/decouvrir-la-formation-developpeur-blockchain-alyra"} text={"Projet de formation Alyra"} />
       <Spacer />

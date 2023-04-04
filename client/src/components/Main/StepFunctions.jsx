@@ -14,7 +14,7 @@ function StepFunctions() {
 
   const RESET = async e => { await contract.methods.RESET().send({ from: accounts[0] }); };
   const Selection = async e => { await contract.methods.Selection("0x326C977E6efc84E512bB9C30f76E30c160eD06FB").send({ from: accounts[0] }); };
-  const Settings = async e => { await contract.methods.Settings().send({ from: accounts[0] });  };
+  const Settings = async e => { await contract.methods.Settings("0x326C977E6efc84E512bB9C30f76E30c160eD06FB").send({ from: accounts[0] });  };
   const Swap = async e => { await contract.methods.Swap().send({ from: accounts[0] }); };
   const DepositMixer = async e => { await contract.methods.DepositMixer().send({ from: accounts[0] }); };
   const WithdrawMixer = async e => { await contract.methods.WithdrawMixer().send({ from: accounts[0] }); };

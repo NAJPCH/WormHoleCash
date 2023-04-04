@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 //import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 pragma solidity 0.8.18;
 
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function approve(address spender, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
+    //function totalSupply() external view returns (uint256);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+    //function allowance(address owner, address spender) external view returns (uint256);
 }
 
 interface IWETH {
@@ -17,7 +22,7 @@ interface ISwapRouter {
     struct ExactInputSingleParams {
         address tokenIn;
         address tokenOut;
-        uint24 fee;
+        uint24  fee;
         address recipient;
         uint256 deadline;
         uint256 amountIn;
@@ -34,7 +39,14 @@ interface ISwapRouter {
 
 contract WormHoleCash { // is ReentrancyGuard {
     ISwapRouter public immutable swapRouter;
- 
+    AggregatorV3Interface internal priceFeed;
+
+    struct TokenList {
+        //address From; address To;
+        address Token;
+        uint8 State; //1=selected 2=Swaped 3=BackSwaped 4=Error je pourais améliorer ça en array outruct ou enum
+    }
+
     address public constant SwapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address public constant WETH9 = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
     address public constant DAI = 0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844;
@@ -44,15 +56,9 @@ contract WormHoleCash { // is ReentrancyGuard {
     uint public mixingDuration = 1 minutes;
     uint public entropy = 0;
     uint256 public depositStartTime;
-
-
-    struct TokenList {
-        //address From; address To;
-        address Token;
-        uint8 State; //1=selected 2=Swaped 3=BackSwaped 4=Error je pourais améliorer ça en array outruct ou enum
-    }
-
+    uint24 public constant poolFee = 3000;    // frais de pool standard Uniswap à 0.3%
     TokenList[] public tokenList;
+    Steps public step;
 
     enum Steps {
         TokenSelection, // sélection des token que l'on souhaite utiliser   
@@ -61,13 +67,12 @@ contract WormHoleCash { // is ReentrancyGuard {
         DepositMixer,   // Tornado Cash dépo
         //Waiting,        // Mixage Automation via Gelato
         WithdrawMixer,  // Tornado Cash sortie
-        FeesServices,   // Frais d'utilisation
+        //FeesServices,   // Frais d'utilisation
         SwapBack,       // Swap vers Tokens
         Done            // Enjoy
     }
 
-    Steps public step;
-
+    //------------------------------------------------------------------ EVENTS
     event StepChanged(
         Steps previousStatus,
         Steps newStatus
@@ -75,15 +80,12 @@ contract WormHoleCash { // is ReentrancyGuard {
 
     event TokenListed(TokenList tokenSelected);
     event OutputAddressSeted(address OuputAddress);
+    event Received(address, uint); // Event émis lorsque des ETH sont reçus
  
-    // Pour cet exemple, on va prendre des frais de pool à 0.3%
-    uint24 public constant poolFee = 3000;
- 
-    /*constructor(ISwapRouter _swapRouter) {
-        swapRouter = _swapRouter;
-    }*/
+    /*constructor(ISwapRouter _swapRouter) { swapRouter = _swapRouter; }*/
     constructor() {
         swapRouter = ISwapRouter(SwapRouterV3);
+        priceFeed = AggregatorV3Interface(  0xb4c4a493AB6356497713A78FFA6c60FB53517c63 );
     }
     //------------------------------------------------------------------ SETTING
     /*function getOuputAddress() public view returns (address) { return OuputAddress; }
@@ -111,14 +113,12 @@ contract WormHoleCash { // is ReentrancyGuard {
 
 
     //------------------------------------------------------------------ UNISWAP
+   
     function swapExactInputSingle(uint256 amountIn, address _tokenIn, address _tokenOut) public {
-        // rajoute un bool SwapBack pour savoir si c'est un swap ou un swapback pour utiliser cette fontion dans les deux sens
-        // Transfert des tokens en question au smart contract ! Il faut penser à approve ce transfert avant l’utilisation de cette fonction 
-        IERC20(_tokenIn).transferFrom(msg.sender, address(this), amountIn);
-        // autoriser uniswap à utiliser nos tokens
-        IERC20(_tokenIn).approve(address(swapRouter), amountIn);  
-        //Creation des paramètres pour l'appel du swap
-        ISwapRouter.ExactInputSingleParams memory params =
+        IERC20(_tokenIn).transferFrom(msg.sender, address(this), amountIn);// Transfert des tokens en question au smart contract ! Il faut penser à approve ce transfert avant l’utilisation de cette fonction 
+        IERC20(_tokenIn).approve(address(swapRouter), amountIn);  // autoriser uniswap à utiliser nos tokens
+        
+        ISwapRouter.ExactInputSingleParams memory params = //Creation des paramètres pour l'appel du swap
             ISwapRouter.ExactInputSingleParams({
                 tokenIn: _tokenIn,
                 tokenOut: _tokenOut,
@@ -126,17 +126,61 @@ contract WormHoleCash { // is ReentrancyGuard {
                 recipient: msg.sender,
                 deadline: block.timestamp,
                 amountIn: amountIn,
-                amountOutMinimum: 0,
-                // amountOutMinimum: _amountOutMinimum; pour eviter les frontrun  se lie a chainlink pour ça
+                amountOutMinimum: 0, // amountOutMinimum: _amountOutMinimum; pour eviter les frontrun  se lie a chainlink pour ça
                 sqrtPriceLimitX96: 0
             });
-        // effectuer le swap, ETH sera transférer directement au msg.sender
-        swapRouter.exactInputSingle(params);
-
+        
+        swapRouter.exactInputSingle(params);// effectuer le swap, ETH sera transférer directement au msg.sender
 
     }
 
-    function swapOrSwapBack(bool _SwapBack, uint256 _amountIn, address _tokenIn, address _tokenOut) public {
+    function swapTokensForETH(uint256 amountIn, address _token) public {
+        swapExactInputSingle(amountIn, _token, WETH9);
+        uint256 wethBalance = IERC20(WETH9).balanceOf(address(this));// WETH en ETH
+        unwrapETH(wethBalance);
+    }
+
+    function swapETHForTokens(uint256 amountIn, address _token) public payable {
+        uint256 WHCfees = amountIn / 1000;
+        uint256 amountAfterFees = amountIn - WHCfees; // 0.1% fees for the service we provide <3 
+        
+        wrapETH(amountAfterFees);// Appel de wrapETH() pour convertir ETH en WETH
+        swapExactInputSingle(amountAfterFees, WETH9, _token);// Appel de swapExactInputSingle() pour effectuer le swap en tokens
+
+        if (msg.value > amountAfterFees) {// Renvoyer les ETH restants  // revoir cette sécurité
+            payable(msg.sender).transfer(msg.value - amountAfterFees);
+        }
+    }
+
+    function wrapETH(uint256 amountIn) public payable {
+        //require(msg.value >= amountIn, "Not enough ETH sent");
+        IWETH(WETH9).deposit{value: amountIn}();// Convertir ETH en WETH
+        IERC20(WETH9).transfer(msg.sender, amountIn);// Transférer les WETH convertis au msg.sender
+
+        if (msg.value > amountIn) {// Renvoyer les ETH restants (si msg.value > amountIn)
+            payable(msg.sender).transfer(msg.value - amountIn);
+        }
+    }
+
+    function wrapETH2(uint256 amountIn, address recipient) public payable {
+        require(msg.value >= amountIn, "Not enough ETH sent");
+        IERC20(WETH9).approve(address(this), amountIn); // Utiliser IERC20 pour appeler la fonction approve
+        IWETH(WETH9).deposit{value: amountIn}(); // Convertir ETH en WETH
+        IERC20(WETH9).transfer(recipient, amountIn); // Transférer les WETH convertis au destinataire
+
+        if (msg.value > amountIn) { // Renvoyer les ETH restants (si msg.value > amountIn)
+            payable(msg.sender).transfer(msg.value - amountIn);
+        }
+    }
+
+    function unwrapETH(uint256 amountIn) public payable{
+        //require(IERC20(WETH9).balanceOf(msg.sender) >= amountIn, "Not enough WETH balance");
+        IERC20(WETH9).transferFrom(msg.sender, address(this), amountIn);// Transférer les WETH du msg.sender au contrat
+        IWETH(WETH9).withdraw(amountIn);// Convertir les WETH en ETH
+        payable(msg.sender).transfer(amountIn);// Envoyer les ETH convertis au msg.sender
+    }
+
+    /*function swapOrSwapBack(bool _SwapBack, uint256 _amountIn, address _tokenIn, address _tokenOut) public {
         
         if (!_SwapBack) {
             swapExactInputSingle(_amountIn, _tokenIn, _tokenOut);
@@ -148,41 +192,18 @@ contract WormHoleCash { // is ReentrancyGuard {
             swapExactInputSingle(_amountIn, _tokenOut, _tokenIn); // inversion in et out pour faire machine arrière
             /*for (uint i = 0; i < tokenList.length; i++) {
                 tokenList[i].State = 3;     // recherche le token correspondant dans le tableau et le passe a l'état backSwaped
-            }*/
+            }*//*
         }
-    }
-
-    function swapExactTokensForETH(uint256 amountIn, address _token) external {
-        // Transfert des tokens en question au smart contract ! Il faut penser à approve ce transfert avant l’utilisation de cette fonction 
-        IERC20(_token).transferFrom(msg.sender, address(this), amountIn);
-
-        // autoriser uniswap à utiliser nos tokens
-        IERC20(_token).approve(address(swapRouter), amountIn);
-        
-        // Creation des paramètres pour l'appel du swap
-        ISwapRouter.ExactInputSingleParams memory params =
-            ISwapRouter.ExactInputSingleParams({
-                tokenIn: _token,
-                tokenOut: WETH9,
-                fee: poolFee,
-                recipient: address(this), // Change recipient to the contract address itself
-                deadline: block.timestamp + 15 minutes, // Add a 15 minutes buffer
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                sqrtPriceLimitX96: 0
-            });
-
-        // effectuer le swap, WETH sera transféré au contrat
-        swapRouter.exactInputSingle(params);
-
-        // Convertir WETH en ETH et transférer à msg.sender
-        //uint256 wethBalance = IERC20(WETH9).balanceOf(address(this));
-        //IWETH(WETH9).withdraw(wethBalance);
-        //payable(msg.sender).transfer(wethBalance);
-    }
-
+    }*/
 
     //------------------------------------------------------------------ TORNADO CASH
+    //------------------------------------------------------------------ CHAIN LINK
+    
+    function getLatestPrice() public view returns (int) {
+        (,int price,,,) = priceFeed.latestRoundData();
+        return price;
+    }
+
     //------------------------------------------------------------------ WORKFLOW
     //visibilité internal plutôt que private. Cela permettra aux contrats dérivés ou aux contrats de Gelato Network de pouvoir interagir avec ces fonctions.
 
@@ -205,16 +226,16 @@ contract WormHoleCash { // is ReentrancyGuard {
         setOuputAddress(_OuputAddress);
     }
 
-    function Swap() public {
+    function Swap(uint256 amountIn, address _token) public {
         changeStep( Steps.Swap, Steps.DepositMixer );
-        //swapOrSwapBack(false, 10000000000000000000, DAI, WETH9);
+        swapTokensForETH( amountIn, _token);
         DepositMixer();
     }
     
-    function DepositMixer() private {
+    function DepositMixer() public {
         changeStep( Steps.DepositMixer, Steps.WithdrawMixer );
         depositStartTime = block.timestamp;
-        //step5WithdrawMixer();
+        WithdrawMixer();
     }
         
     // je crois que cette étape est inutile car le star() est dasn la step avant et le require est dans la step d'après
@@ -227,22 +248,23 @@ contract WormHoleCash { // is ReentrancyGuard {
 
     function WithdrawMixer() public {  //en internal pour l'implementation de Gelato
         require(block.timestamp >= depositStartTime + mixingDuration, "You must wait 24h at least");
-        changeStep( Steps.WithdrawMixer, Steps.FeesServices );
-        FeesServices(); 
+        changeStep( Steps.WithdrawMixer, Steps.SwapBack );
+        SwapBack(); 
     }
     
-    function FeesServices() private {
-        changeStep( Steps.FeesServices, Steps.SwapBack );
-        SwapBack();
-    }
+    //function FeesServices() public { SwapBack(); }
     
     function SwapBack() private {
         changeStep( Steps.SwapBack, Steps.Done );
-        swapOrSwapBack(true, 10000000000000000000, WETH9, DAI);
+        //swapOrSwapBack(true, 10000000000000000000, WETH9, DAI);
         Done();
     }
     
     function Done() private { }
 
+       receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
+    
 
 }

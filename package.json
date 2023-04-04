@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@chainlink/contracts": "^0.6.1",
     "@chakra-ui/icons": "^2.0.18",
     "@openzeppelin/contracts": "^4.8.2",
     "@openzeppelin/test-helpers": "^0.5.16",

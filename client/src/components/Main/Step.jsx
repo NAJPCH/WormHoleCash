@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import useEth from "../../contexts/EthContext/useEth";
 import { Button, Progress } from '@chakra-ui/react';
 
-const Step = () => {
+const Step = ({step, setStep}) => {
     const { state: { contract , accounts, txhash, web3} } = useEth();
    //const [newEvents, setNewEvents] = useState([]);
-    const [step, setStep] = useState("");
+    
     const [newEvents, setNewEvents] = useState([]);
 
     const getCurrentStep = async () => {
@@ -43,11 +43,15 @@ const Step = () => {
 
     getCurrentStep();
 
+
+  const RESET = async e => { await contract.methods.RESET().send({ from: accounts[0] }); };
+
     return (
         <div> 
             <h2>Steps process</h2>
             <Progress value={step*12.5} />
-            <Button onClick={getCurrentStep}>getCurrentStep</Button>
+            <Button colorScheme='blue' onClick={getCurrentStep}>getCurrentStep</Button>
+            <Button colorScheme='red' onClick={RESET}>RESET</Button>
             <p>step:{step}</p>
         </div>     
 );
