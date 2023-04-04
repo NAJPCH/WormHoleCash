@@ -1,8 +1,6 @@
 import { useState } from "react";
 import useEth from "../../contexts/EthContext/useEth";
 import Step from "./Step";
-//import Contract from "./Contract";
-//import ContractBtns from "./ContractBtns";
 import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
 import ConnectWallet from "./ConnectWallet";
@@ -11,6 +9,11 @@ import StepFunctions from "./StepFunctions";
 import DepositMixer from "./DepositMixer";
 import WithdrawMixer from "./WithdrawMixer";
 
+/*  const handleInputChange = e => {
+    if (/^\d+$|^$/.test(e.target.value)) {
+      setInputValue(e.target.value);
+    }
+  };*/ 
 function Main() {
   const { state } = useEth();
   //const [value, setValue] = useState("?");
@@ -41,3 +44,4 @@ function Main() {
 }
 
 export default Main;
+

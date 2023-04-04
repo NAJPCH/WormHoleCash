@@ -33,8 +33,8 @@ function Header(connected) {
 
   return (
     <Flex h='10'>
-      <Box boxSize='200px'>
-        <Image src='../client/public/WHC_W.jpeg' />
+      <Box boxSize='40px'>
+        <Image src='https://i.postimg.cc/xTfX6hh4/WHC-W.png' />
       </Box>
       <Spacer />
       <Box>
