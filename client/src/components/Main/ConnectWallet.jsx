@@ -3,6 +3,8 @@ import Web3 from 'web3';
 import useEth from "../../contexts/EthContext/useEth";
 import { Input, Stack, InputGroup, InputLeftAddon, CheckboxGroup, Checkbox, Center } from '@chakra-ui/react';
 import { Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
+import useToastManager from "./useToastManager"; // Importez le custom hook dans vos autres composants
+
 
 const ERC20_ABI = [
   {
@@ -22,6 +24,8 @@ const TOKEN_ADDRESSES = {
   '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6': 'WETH',
 };
 
+
+
 const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
   const [web3, setWeb3] = useState(null);
   const [account, setAccount] = useState('');
@@ -35,10 +39,21 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
     state: { contract, accounts },
   } = useEth();
 
-  const Selection = async e => { await contract.methods.Selection(selectedValues.join(', ')).send({ from: accounts[0] }); };
-  const Settings = async e => { await contract.methods.Settings(destinationAddress).send({ from: accounts[0] });  };
+
+  const { showToast, showToastForTransaction } = useToastManager();
+
+  const Selection = async => {
+    const transactionPromise = contract.methods.Selection(selectedValues.join(', ')).send({ from: accounts[0] });
+    showToastForTransaction(transactionPromise, (result) => { console.log("TX OK");}, (error) => { console.log("TX KO");});
+  };
+
   //const Swap = async e => { await contract.methods.Swap(100).send({ from: accounts[0] }); };
   //const getLatestPrice = async e => { await contract.methods.getLatestPrice().call({ from: accounts[0] }); };
+
+  const Settings = async => {
+    const transactionPromise = contract.methods.Settings(destinationAddress).send({ from: accounts[0] }); 
+    showToastForTransaction(transactionPromise, (result) => { console.log("TX OK");}, (error) => { console.log("TX KO");});
+  };
 
   useEffect(() => {
     const connectMetaMask = async () => {
