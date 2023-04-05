@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import useEth from "../../contexts/EthContext/useEth";
-import { Input, Stack, InputGroup, InputLeftAddon, CheckboxGroup, Checkbox, Center } from '@chakra-ui/react';
+import { Input, Stack, InputGroup, InputLeftAddon, ListItem, UnorderedList, Switch, Center } from '@chakra-ui/react';
 import { Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
 import useToastManager from "./useToastManager"; // Importez le custom hook dans vos autres composants
 
@@ -125,16 +125,13 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
             <Box><Heading size='md'>Setings</Heading></Box>
             <Box>
               <Heading size='xs' textTransform='uppercase'>Tokens</Heading>
-              <CheckboxGroup colorScheme='green'>
-                <Stack spacing={[1, 1]} direction={['row', 'column']}>
-                  {Object.entries(tokenBalances).map(([address, { name, balance }]) => (
-                    <Checkbox onChange={handleChange} isDisabled={name === "LINK" ? false : true}  value={address}> {/*Limited only for the Demo*/}
+              <UnorderedList>
+                  {Object.entries(tokenBalances).map(([address, { name, balance }]) => (<ListItem>
+                    <Switch onChange={handleChange} isDisabled={name === "LINK" ? false : true}  value={address}> 
                       <Text as='b'>{/*address*/name }</Text>
-                      <Text as='i'>{' (' + parseFloat(balance).toFixed(2) + ')'}</Text>
-                    </Checkbox>
-                  ))}
-                </Stack>
-              </CheckboxGroup>
+                      <Text as='i'>{' (' + parseFloat(balance).toFixed(2) + ')'}</Text></Switch>
+                      </ListItem>))}
+                      </UnorderedList>
             </Box>
             <Box>
               {/*<p>Éléments sélectionnés : {selectedValues.join(', ')}</p>*/}
