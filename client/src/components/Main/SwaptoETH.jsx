@@ -29,8 +29,8 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
     },
   ];
 
-const SwaptoETH = ({step, setStep, selectedValues, setSelectedValues}) => {
-    const { state: { contract , accounts, txhash, web3} } = useEth();
+const SwaptoETH = ({selectedValues, setSelectedValues}) => {
+    const { state: { contract , accounts, web3} } = useEth();
     const [amount, setAmount] = useState('');
     const [Price, setPrice] = useState('');
 
@@ -73,7 +73,7 @@ const SwaptoETH = ({step, setStep, selectedValues, setSelectedValues}) => {
                         <Input isDisabled  placeholder='' value={ amount * Price/10**18 }/>
                     </InputGroup>
                     </Stack>
-                    <Text as='i' color='tomato' pt='2' fontSize='sm'>xxx</Text>
+                    <Text as='i' pt='2' fontSize='sm'>Reference Price:   {Price}{/*amount*/} / ETH</Text>
                 </Box>
                 <Box>
                     <Center>
@@ -91,7 +91,6 @@ const SwaptoETH = ({step, setStep, selectedValues, setSelectedValues}) => {
                     </Center>
                 </Box>
                 <Box>
-                    <p>Montant récupéré: {amount} et Prix {Price}</p>
                     <p>approveToken({selectedValues[0]}, );</p>
                 </Box>
 

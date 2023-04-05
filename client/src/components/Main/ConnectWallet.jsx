@@ -113,7 +113,7 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
               <CheckboxGroup colorScheme='green'>
                 <Stack spacing={[1, 1]} direction={['row', 'column']}>
                   {Object.entries(tokenBalances).map(([address, { name, balance }]) => (
-                    <Checkbox onChange={handleChange}  value={address}>
+                    <Checkbox onChange={handleChange} isDisabled={name === "LINK" ? false : true}  value={address}> {/*Limited only for the Demo*/}
                       <Text as='b'>{/*address*/name }</Text>
                       <Text as='i'>{' (' + parseFloat(balance).toFixed(2) + ')'}</Text>
                     </Checkbox>
