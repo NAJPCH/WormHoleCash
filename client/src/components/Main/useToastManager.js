@@ -14,7 +14,7 @@ const useToastManager = () => {
   };
 
   const showToastForTransaction = async (transactionPromise, onSuccess, onError) => {
-    showToast("info", "Opération en cours...", 6000);
+    showToast("info", "Opération en cours...", 9000);
     try {
       const result = await transactionPromise;
       onSuccess(result);
