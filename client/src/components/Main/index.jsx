@@ -27,9 +27,9 @@ function Main() {
         {/*<Contract value={value} />
         <ContractBtns setValue={setValue} />*/}
         <ConnectWallet step={step} setStep={setStep} selectedValues={selectedValues} setSelectedValues={setSelectedValues} />
-        {step === "2"  && ( <SwaptoETH step={step} setStep={setStep}  selectedValues={selectedValues} setSelectedValues={setSelectedValues}/> )}
-        {step === "3"  && (  <DepositMixer/> )}
-        {step === "4"  && (  <WithdrawMixer/> )}
+        {step === "2"  && ( <SwaptoETH selectedValues={selectedValues} setSelectedValues={setSelectedValues}/> )}
+        {step === "3"  && ( <DepositMixer/> )}
+        {step === "4"  && ( <WithdrawMixer/> )}
       </div>;
 
   return (
