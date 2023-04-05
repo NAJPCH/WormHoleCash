@@ -134,7 +134,7 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
                       </UnorderedList>
             </Box>
             <Box>
-              {/*<p>Éléments sélectionnés : {selectedValues.join(', ')}</p>*/}
+              {<p>Debug Éléments sélectionnés : {selectedValues.join(', ')}</p>}
               <Center><Button onClick={Selection}>Selection</Button></Center>
             </Box>
 

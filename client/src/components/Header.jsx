@@ -1,5 +1,4 @@
 import { Flex, Spacer, Heading, Box, Image } from '@chakra-ui/react';
-import { SunIcon, MoonIcon } from '@chakra-ui/icons';
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 
@@ -41,10 +40,6 @@ function Header(connected) {
         <Heading>Worm Hole Cash</Heading>
       </Box>
       <Spacer />
-      <Box>
-        <SunIcon />
-        <MoonIcon />
-      </Box>
       <Box>
         <p>{account && `${account.substring(0, 5)}...${account.slice(-3)}`}</p>
         <p>{ethBalance && `${ethBalance} ETH`}</p>

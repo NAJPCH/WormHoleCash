@@ -33,13 +33,16 @@ const SwaptoETH = ({selectedValues, setSelectedValues}) => {
     const { state: { contract , accounts, web3} } = useEth();
     const [amount, setAmount] = useState('');
     const [Price, setPrice] = useState('');
-
     const [isApproved, setIsApproved] = useState(false);
 
     const approveToken = async (tokenAddress, amountInWei) => {
       const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
       await tokenContract.methods.approve(contract.options.address, amountInWei).send({ from: accounts[0] });
     };
+
+    useEffect(() => {
+      getLatestPrice();
+    }, []);
 
     const Swap = async e => { await contract.methods.Swap(amount,selectedValues.join(', ')).send({ from: accounts[0] }); };
 
@@ -73,7 +76,9 @@ const SwaptoETH = ({selectedValues, setSelectedValues}) => {
                         <Input isDisabled  placeholder='' value={ amount * Price/10**18 }/>
                     </InputGroup>
                     </Stack>
-                    <Text as='i' pt='2' fontSize='sm'>Reference Price:   {Price}{/*amount*/} / ETH</Text>
+                    <Text textAlign="right" as="i" pt="2" fontSize="sm" fontFamily="sans-serif">
+                      {Price} / ETH
+                    </Text>
                 </Box>
                 <Box>
                     <Center>
@@ -91,7 +96,7 @@ const SwaptoETH = ({selectedValues, setSelectedValues}) => {
                     </Center>
                 </Box>
                 <Box>
-                    <p>approveToken({selectedValues[0]}, );</p>
+                    <p>Debug: approveToken({selectedValues[0]}, );</p>
                 </Box>
 
                 </Stack>

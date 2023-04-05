@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import useEth from "../../contexts/EthContext/useEth";
-import { Button, Progress } from "@chakra-ui/react";
+import { Button, Progress, Grid, GridItem, Center } from "@chakra-ui/react";
 import useToastManager from "./useToastManager"; // Importez le custom hook ici
+import { ChevronRightIcon } from '@chakra-ui/icons'
 
 const Step = ({step, setStep}) => {
     const { state: { contract , accounts, txhash, web3} } = useEth();
@@ -56,12 +57,21 @@ const Step = ({step, setStep}) => {
 
     return (
         <div> 
-            <h2>Steps process</h2>
-            <Progress value={step*12.5} />
+            <Center h='50px'></Center>
+            <Progress size='xs' value={step*14.28} />
+            <Grid templateColumns='repeat(7, 1fr)' gap={6}>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Token Selection</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Settings</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Swap</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Deposit on Mixer</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Withdraw of Mixer</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Swap Back</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Done</GridItem>
+            </Grid>
             <Button colorScheme='red' onClick={RESET}>RESET</Button>
-            <p>step:{step}</p>
         </div>     
 );
 };
 
 export default Step;
+
