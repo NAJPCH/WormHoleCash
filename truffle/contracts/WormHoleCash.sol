@@ -3,7 +3,7 @@
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 pragma solidity 0.8.18;
-
+    //------------------------------------------------------------------ INTERFACES
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function approve(address spender, uint256 amount) external returns (bool);
@@ -40,6 +40,7 @@ interface ISwapRouter {
 contract WormHoleCash { // is ReentrancyGuard {
     ISwapRouter public immutable swapRouter;
     AggregatorV3Interface internal priceFeed;
+
 
     struct TokenList {
         //address From; address To;
@@ -81,6 +82,7 @@ contract WormHoleCash { // is ReentrancyGuard {
     event TokenListed(TokenList tokenSelected);
     event OutputAddressSeted(address OuputAddress);
     event Received(address, uint); // Event émis lorsque des ETH sont reçus
+    event Swaped(uint256 amountIn, address _token);
  
     /*constructor(ISwapRouter _swapRouter) { swapRouter = _swapRouter; }*/
     constructor() {
@@ -94,11 +96,13 @@ contract WormHoleCash { // is ReentrancyGuard {
 
     function setOuputAddress(address _OuputAddress) private {
         OuputAddress = _OuputAddress;
+        emit OutputAddressSeted(_OuputAddress);
     }
 
     function addToken(address _token) private {
         TokenList memory newToken = TokenList(_token, 1);
         tokenList.push(newToken);
+        emit TokenListed(newToken);
     }
     
     function getTokenState(uint256 _index) private view returns (uint8) {
@@ -110,7 +114,6 @@ contract WormHoleCash { // is ReentrancyGuard {
         require(_index < tokenList.length, "Token index out of bounds");
         tokenList[_index].State = _newState;
     }
-
 
     //------------------------------------------------------------------ UNISWAP
    
@@ -138,6 +141,7 @@ contract WormHoleCash { // is ReentrancyGuard {
         swapExactInputSingle(amountIn, _token, WETH9);
         uint256 wethBalance = IERC20(WETH9).balanceOf(address(this));// WETH en ETH
         unwrapETH(wethBalance);
+        emit Swaped(amountIn, _token);
     }
 
     function swapETHForTokens(uint256 amountIn, address _token) public payable {

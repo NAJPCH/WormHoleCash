@@ -31,6 +31,8 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
   const [account, setAccount] = useState('');
   const [tokenBalances, setTokenBalances] = useState({});
   //const { state: { contract , accounts, txhash, web3} } = useEth();
+  const [tokenListedEvents, setTokenListedEvents] = useState([]);
+
 
   const [destinationAddress, setDestinationAddress] = useState('');
   const [Amount, setAmount] = useState('');
@@ -112,6 +114,42 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
     setAmount(e.target.value);
   };
 
+  useEffect(() => {
+    if (contract) {
+      const tokenListedEvent = contract.events.TokenListed({}, (error, event) => {
+        if (error) {
+          console.error('Error on TokenListed event:', error);
+        } else {
+          setTokenListedEvents((events) => [...events, event]);
+        }
+      });
+  
+      return () => {
+        tokenListedEvent.unsubscribe();
+      };
+    }
+  }, [contract]);
+  
+  const fetchPastTokenListedEvents = async () => {
+    if (contract) {
+      try {
+        const events = await contract.getPastEvents('TokenListed', {
+          fromBlock: 0,
+          toBlock: 'latest',
+        });
+  
+        setTokenListedEvents(events);
+      } catch (error) {
+        console.error('Error fetching past TokenListed events:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchPastTokenListedEvents();
+  }, [contract]);
+  
+
 
   return (
     <div>
@@ -171,7 +209,40 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
           </Stack>
         </CardBody>
       </Card></Center>
+
+      
     )}
+
+        <Center>
+          <Card maxW='md' minW='500px' bg='yellow'>
+            <CardBody>
+              <Stack divider={<StackDivider />} spacing='2'>
+                <Box>
+                  <Heading size='xs' textTransform='uppercase'>DEBUG TokenListed Events</Heading>
+                  <div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Event ID</th>
+                        <th>Token Address</th>
+                        <th>Token State</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tokenListedEvents.map((event, index) => (
+                        <tr key={index}>
+                          <td>{index}</td>
+                          <td>{event.returnValues.tokenSelected.Token.substring(0, 5)}...${event.returnValues.tokenSelected.Token.slice(-3)}</td>
+                          <td>{event.returnValues.tokenSelected.State}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  </div>
+                </Box>
+              </Stack>
+            </CardBody>
+      </Card></Center>
 
     </div>
   );
