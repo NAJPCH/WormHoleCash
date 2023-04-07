@@ -13,45 +13,55 @@ const Step = ({step, setStep}) => {
         const currentStep = await contract.methods.getCurrentStep().call({ from: accounts[0] });
         setStep(currentStep);
     };
+      
 
     const { showToast, showToastForTransaction } = useToastManager(); // Utilisez le custom hook ici
 
-    const RESET = async (e) => {
-        const transactionPromise = contract.methods.RESET().send({ from: accounts[0] });
+    const reset = async (e) => {
+        const transactionPromise = contract.methods.reset().send({ from: accounts[0] });
         showToastForTransaction(transactionPromise, (result) => {}, (error) => {});
-      };
-    
+    };
 
     useEffect(() => {
         async function getPastEvent() {
-            const deployTx = await web3.eth.getTransaction(txhash);
-            const results = await contract.getPastEvents("WorkflowStatusChange", { fromBlock: deployTx.blockNumber, toBlock: "latest" });
-            
-            const pastWorkflowEvents = results.map((workflowEvent) => {
-                let pastE = {previousStatus: null, newStatus: null};
-                pastE.previousStatus = workflowEvent.returnValues.previousStatus;
-                pastE.newStatus = workflowEvent.returnValues.newStatus;
-                return pastE;
-            });
-            setNewEvents(pastWorkflowEvents);
+        if (!txhash) {
+            return;
         }
-        getPastEvent();
+    
+        const deployTx = await web3.eth.getTransaction(txhash);
+        const results = await contract.getPastEvents("StepChanged", {
+            fromBlock: deployTx.blockNumber,
+            toBlock: "latest",
+            filter: { user: accounts[0] }, // Ajoutez cette ligne pour filtrer les événements par utilisateur
+        });
+        
+        const pastWorkflowEvents = results.map((workflowEvent) => {
+            let pastE = {previousStatus: null, newStatus: null};
+            pastE.previousStatus = workflowEvent.returnValues.previousStatus;
+            pastE.newStatus = workflowEvent.returnValues.newStatus;
+            return pastE;
+        });
+        setNewEvents(pastWorkflowEvents);
+    }
+    getPastEvent();
+    //getCurrentStep();  je pense qu'il est en doublon
 
-        contract.events.StepChanged({ fromBlock: "latest" })
-            .on("data", (event) => {
-                let newEvent = {previousStatus: null, newStatus: null};
-                newEvent.previousStatus = event.returnValues.previousStatus;
-                newEvent.newStatus = event.returnValues.newStatus;
-                
-                let events = newEvents;
-                events.push(newEvent);
-                setNewEvents(events)
-                console.log(newEvents);
+    contract.events
+        .StepChanged({ fromBlock: "latest", filter: { user: accounts[0] } })
+        .on("data", (event) => {
+            let newEvent = {previousStatus: null, newStatus: null};
+            newEvent.previousStatus = event.returnValues.previousStatus;
+            newEvent.newStatus = event.returnValues.newStatus;
+            
+            let events = newEvents;
+            events.push(newEvent);
+            setNewEvents(events)
+            console.log(newEvents);
 
-                getCurrentStep();
-                showToast('success', 'Transaction réussie');
-            });
-    }, [contract , accounts, txhash, web3]);
+            getCurrentStep();
+            showToast('success', 'Transaction réussie');
+        });
+    }, [contract, accounts, txhash, web3, getCurrentStep]);
 
     getCurrentStep();
 
@@ -60,15 +70,15 @@ const Step = ({step, setStep}) => {
             <Center h='50px'></Center>
             <Progress size='xs' value={step*14.28} />
             <Grid templateColumns='repeat(7, 1fr)' gap={6}>
-                <GridItem w='100%' h='10' ><ChevronRightIcon />Token Selection</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Token selection</GridItem>
                 <GridItem w='100%' h='10' ><ChevronRightIcon />Settings</GridItem>
                 <GridItem w='100%' h='10' ><ChevronRightIcon />Swap</GridItem>
-                <GridItem w='100%' h='10' ><ChevronRightIcon />Deposit on Mixer</GridItem>
-                <GridItem w='100%' h='10' ><ChevronRightIcon />Withdraw of Mixer</GridItem>
-                <GridItem w='100%' h='10' ><ChevronRightIcon />Swap Back</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Deposit on mixer</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Withdraw of mixer</GridItem>
+                <GridItem w='100%' h='10' ><ChevronRightIcon />Swap back</GridItem>
                 <GridItem w='100%' h='10' ><ChevronRightIcon />Done</GridItem>
             </Grid>
-            <Button colorScheme='red' onClick={RESET}>RESET</Button>
+            <Button colorScheme='red' onClick={reset}>Debug Reset</Button>
         </div>     
 );
 };

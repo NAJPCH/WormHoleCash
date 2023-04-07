@@ -49,14 +49,6 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
     showToastForTransaction(transactionPromise, (result) => { console.log("TX OK");}, (error) => { console.log("TX KO");});
   };
 
-  //const Swap = async e => { await contract.methods.Swap(100).send({ from: accounts[0] }); };
-  //const getLatestPrice = async e => { await contract.methods.getLatestPrice().call({ from: accounts[0] }); };
-
-  const Settings = async => {
-    const transactionPromise = contract.methods.Settings(destinationAddress).send({ from: accounts[0] }); 
-    showToastForTransaction(transactionPromise, (result) => { console.log("TX OK");}, (error) => { console.log("TX KO");});
-  };
-
   useEffect(() => {
     const connectMetaMask = async () => {
       if (window.ethereum) {
@@ -150,69 +142,8 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
   }, [contract]);
   
 
-
   return (
     <div>
-      {/*account && ( <p> <strong>Connected with:</strong> {account} </p> )*/}
-      {step === "0"  && (  
-        <Center>
-        <Card maxW='md' minW='500px'>
-        <CardBody>
-          
-          <Stack divider={<StackDivider />} spacing='2'>
-            <Box><Heading size='md'>Setings</Heading></Box>
-            <Box>
-              <Heading size='xs' textTransform='uppercase'>Tokens</Heading>
-              <UnorderedList>
-                  {Object.entries(tokenBalances).map(([address, { name, balance }]) => (<ListItem>
-                    <Switch onChange={handleChange} isDisabled={name === "LINK" ? false : true}  value={address}> 
-                      <Text as='b'>{/*address*/name }</Text>
-                      <Text as='i'>{' (' + parseFloat(balance).toFixed(2) + ')'}</Text></Switch>
-                      </ListItem>))}
-                      </UnorderedList>
-            </Box>
-            <Box>
-              {<p>Debug Éléments sélectionnés : {selectedValues.join(', ')}</p>}
-              <Center><Button onClick={Selection}>Selection</Button></Center>
-            </Box>
-
-          </Stack>
-        </CardBody>
-      </Card>
-      </Center>
-    )}
-    {step === "1"  && (   
-      <Center>
-      <Card maxW='md' minW='500px'>
-        <CardBody>
-          
-          <Stack divider={<StackDivider />} spacing='2'>
-            <Box>
-              <Heading size='xs' textTransform='uppercase'>Adresses </Heading>
-              <Stack spacing={4}>
-                <InputGroup size='sm'>
-                  <InputLeftAddon width='60px' children='From' />
-                  <Input type='F' isDisabled placeholder={account} />
-                </InputGroup>
-                {/* If you add the size prop to `InputGroup`, it'll pass it to all its children. */}
-                <InputGroup size='sm'>
-                  <InputLeftAddon width='60px' children=' To' />
-                  <Input type='F'onChange={handleDestinationAddressChange}  placeholder='Put your destination address here' />
-                </InputGroup>
-              </Stack>
-              <Text as='i' color='tomato' pt='2' fontSize='sm'>Must be out of any link from your current address</Text>
-            </Box>
-            <Box>
-            <Center><Button onClick={Settings}>Settings</Button></Center>
-            </Box>
-
-          </Stack>
-        </CardBody>
-      </Card></Center>
-
-      
-    )}
-
         <Center>
           <Card maxW='md' minW='500px' bg='yellow'>
             <CardBody>
@@ -242,8 +173,36 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
                 </Box>
               </Stack>
             </CardBody>
-      </Card></Center>
+      </Card>
+    </Center>
 
+      {step === "0"  && (  
+        <Center>
+        <Card maxW='md' minW='500px'>
+        <CardBody>
+          
+          <Stack divider={<StackDivider />} spacing='2'>
+            <Box><Heading size='md'>Setings</Heading></Box>
+            <Box>
+              <Heading size='xs' textTransform='uppercase'>Tokens</Heading>
+              <UnorderedList>
+                  {Object.entries(tokenBalances).map(([address, { name, balance }]) => (<ListItem>
+                    <Switch onChange={handleChange} isDisabled={name === "LINK" ? false : true}  value={address}> 
+                      <Text as='b'>{/*address*/name }</Text>
+                      <Text as='i'>{' (' + parseFloat(balance).toFixed(2) + ')'}</Text></Switch>
+                      </ListItem>))}
+                      </UnorderedList>
+            </Box>
+            <Box>
+              {<p>Debug Éléments sélectionnés : {selectedValues.join(', ')}</p>}
+              <Center><Button onClick={Selection}>Selection</Button></Center>
+            </Box>
+
+          </Stack>
+        </CardBody>
+      </Card>
+      </Center>
+    )}
     </div>
   );
 };

@@ -19,6 +19,7 @@ interface IWETH {
 }
 
 interface ISwapRouter {
+
     struct ExactInputSingleParams {
         address tokenIn;
         address tokenOut;
@@ -41,6 +42,13 @@ contract WormHoleCash { // is ReentrancyGuard {
     ISwapRouter public immutable swapRouter;
     AggregatorV3Interface internal priceFeed;
 
+    //------------------------------------------------------------------ STRUCTURES
+    struct UserData {
+        TokenList[] tokenList;
+        address outputAddress;
+        uint depositStartTime;
+        Steps step;
+    }
 
     struct TokenList {
         //address From; address To;
@@ -48,14 +56,17 @@ contract WormHoleCash { // is ReentrancyGuard {
         uint8 State; //1=selected 2=Swaped 3=BackSwaped 4=Error je pourais améliorer ça en array outruct ou enum
     }
 
+    mapping(address => UserData) private usersData;
+    mapping(address => Steps) private userSteps;
+
     address public constant SwapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address public constant WETH9 = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
     address public constant DAI = 0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844;
     address public constant LINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
 
     address public OuputAddress;
-    uint public mixingDuration = 1 minutes;
-    uint public entropy = 0;
+    uint public mixingDuration = 1 minutes; // Only for Demo
+    //uint public entropy = 0;
     uint256 public depositStartTime;
     uint24 public constant poolFee = 3000;    // frais de pool standard Uniswap à 0.3%
     TokenList[] public tokenList;
@@ -74,15 +85,15 @@ contract WormHoleCash { // is ReentrancyGuard {
     }
 
     //------------------------------------------------------------------ EVENTS
-    event StepChanged(
+    /*event StepChanged(
         Steps previousStatus,
         Steps newStatus
-    );
-
-    event TokenListed(TokenList tokenSelected);
-    event OutputAddressSeted(address OuputAddress);
+    );*/
+    event StepChanged( address indexed user, Steps previousStatus, Steps newStatus );
+    event TokenListed( address indexed user,TokenList tokenSelected);
+    event OutputAddressSet( address indexed user, address outputAddress ); //event OutputAddressSeted(address OuputAddress);
     event Received(address, uint); // Event émis lorsque des ETH sont reçus
-    event Swaped(uint256 amountIn, address _token);
+    event Swaped( address indexed user,uint256 amountIn, address _token);
  
     /*constructor(ISwapRouter _swapRouter) { swapRouter = _swapRouter; }*/
     constructor() {
@@ -94,15 +105,27 @@ contract WormHoleCash { // is ReentrancyGuard {
     function setMixingDuration(uint _mixingDuration) private { mixingDuration = _mixingDuration; }
     function setEntropy(uint _entropy) private { entropy = _entropy; }   */ 
 
-    function setOuputAddress(address _OuputAddress) private {
+    /*function setOuputAddress(address _OuputAddress) private {
         OuputAddress = _OuputAddress;
         emit OutputAddressSeted(_OuputAddress);
+    }*/
+    function setOutputAddress(address _outputAddress) private {
+        //UserData storage userData = usersData[msg.sender];
+        usersData[msg.sender].outputAddress = _outputAddress;
+        emit OutputAddressSet(msg.sender, _outputAddress);
     }
 
-    function addToken(address _token) private {
+
+    /*function addToken(address _token) private {
         TokenList memory newToken = TokenList(_token, 1);
         tokenList.push(newToken);
         emit TokenListed(newToken);
+    }*/
+    function addToken(address _token) private {
+        //UserData storage userData = usersData[msg.sender];
+        TokenList memory newToken = TokenList(_token, 1);
+        usersData[msg.sender].tokenList.push(newToken);
+        emit TokenListed(msg.sender, newToken);
     }
     
     function getTokenState(uint256 _index) private view returns (uint8) {
@@ -114,6 +137,7 @@ contract WormHoleCash { // is ReentrancyGuard {
         require(_index < tokenList.length, "Token index out of bounds");
         tokenList[_index].State = _newState;
     }
+
 
     //------------------------------------------------------------------ UNISWAP
    
@@ -141,7 +165,7 @@ contract WormHoleCash { // is ReentrancyGuard {
         swapExactInputSingle(amountIn, _token, WETH9);
         uint256 wethBalance = IERC20(WETH9).balanceOf(address(this));// WETH en ETH
         unwrapETH(wethBalance);
-        emit Swaped(amountIn, _token);
+        emit Swaped(msg.sender, amountIn, _token);
     }
 
     function swapETHForTokens(uint256 amountIn, address _token) public payable {
@@ -211,33 +235,80 @@ contract WormHoleCash { // is ReentrancyGuard {
     //------------------------------------------------------------------ WORKFLOW
     //visibilité internal plutôt que private. Cela permettra aux contrats dérivés ou aux contrats de Gelato Network de pouvoir interagir avec ces fonctions.
 
-    function changeStep(Steps _from, Steps _to) private{
+    /*function changeStep(Steps _from, Steps _to) private{
         require(step == _from, "changeStep Invalid");
         step = _to;
         emit StepChanged(_from, _to);
+    }*/
+    function changeStep(Steps _from, Steps _to) private {
+        require(userSteps[msg.sender] == _from, "changeStep() not possible");
+        userSteps[msg.sender] = _to;
+        emit StepChanged(msg.sender, _from, _to);
     }
-    function RESET() public { step = Steps.TokenSelection; }
 
-    function getCurrentStep() public view returns (Steps) { return step; }
+    //function RESET() public { step = Steps.TokenSelection; }
+    function reset() public {
+        userSteps[msg.sender] = Steps.TokenSelection; // Réinitialisez l'étape pour l'utilisateur
+        //UserData storage userData = usersData[msg.sender]; // Réinitialisez les tokens sélectionnés pour l'utilisateur
+        delete usersData[msg.sender].tokenList;
+    }
 
-    function Selection(address _selectedAddress) public {
+    //function getCurrentStep() public view returns (Steps) { return step; }
+    function getCurrentStep() public view returns (Steps) {
+        return userSteps[msg.sender];
+    }
+
+    /*function Selection(address _selectedAddress) public {
         changeStep( Steps.TokenSelection, Steps.Settings );
+        addToken(_selectedAddress);
+    }*/
+    /*function Selection(address _selectedAddress) public {
+        UserData storage userData = usersData[msg.sender];
+        require(userData.step == Steps.TokenSelection, "Invalid step");
+        userData.step = Steps.Settings;
+        emit StepChanged(msg.sender, Steps.TokenSelection, Steps.Settings);
+        addToken(_selectedAddress, userData);
+    }*/
+    function Selection(address _selectedAddress) public {
+        changeStep(Steps.TokenSelection, Steps.Settings);
         addToken(_selectedAddress);
     }
 
-    function Settings(address _OuputAddress) public {
+    /*function Settings(address _OuputAddress) public {
         changeStep( Steps.Settings, Steps.Swap );
         setOuputAddress(_OuputAddress);
+    }*/
+    /*function Settings(address _outputAddress) public {
+        UserData storage userData = usersData[msg.sender];
+        require(userData.step == Steps.Settings, "Invalid step");
+        userData.step = Steps.Swap;
+        emit StepChanged(msg.sender, Steps.Settings, Steps.Swap);
+        setOutputAddress(_outputAddress, userData);
+    }*/
+    function Settings(address _outputAddress) public {
+        changeStep(Steps.Settings, Steps.Swap);
+        setOutputAddress(_outputAddress);
     }
 
-    function Swap(uint256 amountIn, address _token) public {
+
+    /*function Swap(uint256 amountIn, address _token) public {
         changeStep( Steps.Swap, Steps.DepositMixer );
         swapTokensForETH( amountIn, _token);
         DepositMixer();
+    }*/
+    function Swap(uint256 amountIn, address _token) public {
+        changeStep(Steps.Swap, Steps.DepositMixer);
+        swapTokensForETH(amountIn, _token);
+        DepositMixer();
     }
-    
-    function DepositMixer() public {
+
+    /*function DepositMixer() public {
         changeStep( Steps.DepositMixer, Steps.WithdrawMixer );
+        depositStartTime = block.timestamp;
+        WithdrawMixer();
+    }*/
+    function DepositMixer() public {
+        changeStep(Steps.DepositMixer, Steps.WithdrawMixer);
         depositStartTime = block.timestamp;
         WithdrawMixer();
     }
@@ -250,23 +321,35 @@ contract WormHoleCash { // is ReentrancyGuard {
         //stepWithdrawMixer();
     }*/
 
-    function WithdrawMixer() public {  //en internal pour l'implementation de Gelato
+    /*function WithdrawMixer() public {  //en internal pour l'implementation de Gelato
         require(block.timestamp >= depositStartTime + mixingDuration, "You must wait 24h at least");
         changeStep( Steps.WithdrawMixer, Steps.SwapBack );
         SwapBack(); 
+    }*/
+    function WithdrawMixer() public {
+        //UserData storage userData = usersData[msg.sender];
+        require(block.timestamp >= usersData[msg.sender].depositStartTime + mixingDuration, "You must wait 24h at least");
+        changeStep(Steps.WithdrawMixer, Steps.SwapBack);
+        SwapBack();
     }
-    
+        
     //function FeesServices() public { SwapBack(); }
     
-    function SwapBack() private {
+    /*function SwapBack() private {
         changeStep( Steps.SwapBack, Steps.Done );
         //swapOrSwapBack(true, 10000000000000000000, WETH9, DAI);
         Done();
+    }*/
+    function SwapBack() private {
+        changeStep(Steps.SwapBack, Steps.Done);
+        //UserData storage userData = usersData[user]; si pas Done(user);
+        // swapOrSwapBack(true, 10000000000000000000, WETH9, DAI);
+        Done(); //Done(user);
     }
-    
+
     function Done() private { }
 
-       receive() external payable {
+    receive() external payable {
         emit Received(msg.sender, msg.value);
     }
     
