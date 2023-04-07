@@ -100,6 +100,18 @@ contract WormHoleCash { // is ReentrancyGuard {
         swapRouter = ISwapRouter(SwapRouterV3);
         priceFeed = AggregatorV3Interface(  0xb4c4a493AB6356497713A78FFA6c60FB53517c63 );
     }
+
+
+    //------------------------------------------------------------------ USER DATA
+    function getUserData(address userAddress) public view returns (TokenList[] memory tokenList, address outputAddress, uint depositStartTime, Steps step) {
+        UserData storage userData = usersData[userAddress];
+        tokenList = userData.tokenList;
+        outputAddress = userData.outputAddress;
+        depositStartTime = userData.depositStartTime;
+        step = userData.step;
+    }
+
+
     //------------------------------------------------------------------ SETTING
     /*function getOuputAddress() public view returns (address) { return OuputAddress; }
     function setMixingDuration(uint _mixingDuration) private { mixingDuration = _mixingDuration; }

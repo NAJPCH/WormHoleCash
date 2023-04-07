@@ -1,4 +1,4 @@
-import { Flex, Spacer, Heading, Box, Image } from '@chakra-ui/react';
+import { Flex, Spacer, Heading, Box, Image, Stack, Text } from '@chakra-ui/react';
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 
@@ -34,6 +34,12 @@ function Header(connected) {
     <Flex h='10'>
       <Box boxSize='40px'>
         <Image src='https://i.postimg.cc/xTfX6hh4/WHC-W.png' />
+      </Box>
+      <Box ml='15px'>
+      <Stack spacing={1}>
+        <Text color='tomato' fontSize='xs'>Version</Text>
+        <Text color='tomato' fontSize='xs'>Alpha 2.1</Text>
+      </Stack>
       </Box>
       <Spacer />
       <Box>
