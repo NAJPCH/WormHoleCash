@@ -1,4 +1,4 @@
-import { Flex, Spacer, Text } from '@chakra-ui/react'
+import { Flex, Spacer, Text, Stack  } from '@chakra-ui/react'
 import useEth from "../contexts/EthContext/useEth";
 
 function Link({ uri, text }) {
@@ -12,9 +12,15 @@ function Footer() {
   return (
     <footer>
       <Flex h='10'>
-        <Link uri={"https://github.com/NAJPCH/WormHoleCash"} text={"GitHub"} />
+        <Stack spacing={0}>
+          <Link uri={"https://github.com/NAJPCH/WormHoleCash"} text={"GitHub"} />
+          <Link uri={"https://whc-1.gitbook.io/whc1/overview/comment-sa-fonctionne"} text={"GitBook"} />
+        </Stack>
         <Spacer />
-        <Text as='samp'>Donation: {contractAddress}</Text>
+        <Stack spacing={0}>
+        <Text fontSize='sm' as='samp'>Donation </Text>
+        <Text fontSize='sm' as='samp'>{contractAddress}</Text>
+        </Stack>
         <Spacer />
         <Link uri={"https://www.alyra.fr/formations/decouvrir-la-formation-developpeur-blockchain-alyra"} text={"Projet de formation Alyra"} />
         <Spacer />

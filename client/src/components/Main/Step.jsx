@@ -13,9 +13,8 @@ const Step = ({step, setStep}) => {
         const currentStep = await contract.methods.getCurrentStep().call({ from: accounts[0] });
         setStep(currentStep);
     };
-      
 
-    const { showToast, showToastForTransaction } = useToastManager(); // Utilisez le custom hook ici
+    const { showToast, showToastForTransaction } = useToastManager(); 
 
     const reset = async (e) => {
         const transactionPromise = contract.methods.reset().send({ from: accounts[0] });
@@ -32,7 +31,7 @@ const Step = ({step, setStep}) => {
         const results = await contract.getPastEvents("StepChanged", {
             fromBlock: deployTx.blockNumber,
             toBlock: "latest",
-            filter: { user: accounts[0] }, // Ajoutez cette ligne pour filtrer les événements par utilisateur
+            filter: { user: accounts[0] }, // Filter by user
         });
         
         const pastWorkflowEvents = results.map((workflowEvent) => {
@@ -44,7 +43,6 @@ const Step = ({step, setStep}) => {
         setNewEvents(pastWorkflowEvents);
     }
     getPastEvent();
-    //getCurrentStep();  je pense qu'il est en doublon
 
     contract.events
         .StepChanged({ fromBlock: "latest", filter: { user: accounts[0] } })

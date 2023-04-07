@@ -11,9 +11,9 @@ const TOKEN_ADDRESSES = {
   '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6': 'WETH',
 };
 
-const Settings = ({selectedValues, setSelectedValues}) => {
+const Settings = ({account, selectedValues, setSelectedValues}) => {
   const [web3, setWeb3] = useState(null);
-  const [account, setAccount] = useState('');
+  //const [account, setAccount] = useState('');
   const [tokenBalances, setTokenBalances] = useState({});
   //const { state: { contract , accounts, txhash, web3} } = useEth();
   const [tokenListedEvents, setTokenListedEvents] = useState([]);

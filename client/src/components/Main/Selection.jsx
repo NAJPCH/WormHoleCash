@@ -26,13 +26,13 @@ const TOKEN_ADDRESSES = {
 
 
 
-const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
+const Selection = ({account, setAccount, step, setStep, selectedValues, setSelectedValues}) => {
   const [web3, setWeb3] = useState(null);
-  const [account, setAccount] = useState('');
+  //const [account, setAccount] = useState('');
   const [tokenBalances, setTokenBalances] = useState({});
   //const { state: { contract , accounts, txhash, web3} } = useEth();
   const [tokenListedEvents, setTokenListedEvents] = useState([]);
-  const [userData, setUserData] = useState(null);
+  
 
 
   const [destinationAddress, setDestinationAddress] = useState('');
@@ -107,6 +107,8 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
     setAmount(e.target.value);
   };
 
+  /*  FOR DEBUG ONLY //--------------------------------------------
+
   useEffect(() => {
     if (contract) {
       const tokenListedEvent = contract.events.TokenListed({}, (error, event) => {
@@ -141,32 +143,15 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
   useEffect(() => {
     fetchPastTokenListedEvents();
   }, [contract]);
-  //--------------------------------------------
-  const fetchUserData = async () => {
-    if (contract && account) {
-      try {
-        const userData = await contract.methods.getUserData(account).call();
-        setUserData(userData);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    }
-  };
-  useEffect(() => {
-    if (contract && account) {
-        fetchUserData();
-    }
-  }, [contract, account]);
-
-
-
+  */ //--------------------------------------------
+ 
   return (
     <div>
-        <Center>
-          <Card maxW='md' minW='500px' bg='yellow'>
+       {/*<Center>
+          <Card maxW='md' minW='800px' bg='gray'>
             <CardBody>
               <Stack divider={<StackDivider />} spacing='2'>
-                <Box>
+                <Box>  FOR DEBUG ONLY
                   <Heading size='xs' textTransform='uppercase'>DEBUG TokenListed Events</Heading>
                   <div>
                   <table>
@@ -190,18 +175,26 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
                   </div>
                 </Box>
                 <Box>
-                  <Heading size="xs" textTransform="uppercase">User Data</Heading>
+                  <Heading size="xs" >USER DATA</Heading>
                   {userData && (
                     <div>
                       <p>Output Address: {userData.outputAddress}</p>
                       <p>Deposit Start Time: {userData.depositStartTime}</p>
+                      <p>Step: {Steps[userData.step]}</p>
+                      <ul>
+                        {userData.tokenList.map((token, index) => (
+                          <li key={index}>
+                            Token: {token.Token} | State: {token.State}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </Box>
               </Stack>
             </CardBody>
       </Card>
-    </Center>
+    </Center>*/}
 
       {step === "0"  && (  
         <Center>
@@ -234,4 +227,4 @@ const ConnectWallet = ({step, setStep, selectedValues, setSelectedValues}) => {
   );
 };
 
-export default ConnectWallet;
+export default Selection;

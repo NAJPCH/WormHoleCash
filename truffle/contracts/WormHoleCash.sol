@@ -263,6 +263,7 @@ contract WormHoleCash { // is ReentrancyGuard {
         userSteps[msg.sender] = Steps.TokenSelection; // Réinitialisez l'étape pour l'utilisateur
         //UserData storage userData = usersData[msg.sender]; // Réinitialisez les tokens sélectionnés pour l'utilisateur
         delete usersData[msg.sender].tokenList;
+        OuputAddress = address(0);
     }
 
     //function getCurrentStep() public view returns (Steps) { return step; }
