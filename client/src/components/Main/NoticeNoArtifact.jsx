@@ -1,8 +1,9 @@
+import { Center } from '@chakra-ui/react'
 function NoticeNoArtifact() {
   return (
-    <p>
-      ⚠️ Cannot find the contract artifact.
-    </p>
+    <Center bg='tomato' h='100px' color='white'>
+    ⚠️ Cannot find the contract artifact.
+  </Center>
   );
 }
 
