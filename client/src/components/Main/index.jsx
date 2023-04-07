@@ -5,8 +5,7 @@ import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
 import ConnectWallet from "./ConnectWallet";
 import Settings from "./Settings";
-import SwaptoETH from "./SwaptoETH";
-import StepFunctions from "./StepFunctions";
+import SwaptoETH from "./SwaptoETH"
 import DepositMixer from "./DepositMixer";
 import WithdrawMixer from "./WithdrawMixer";
 
@@ -20,7 +19,6 @@ function Main() {
   const main =
       <div>
         <Step step={step} setStep={setStep} />
-        {/*<StepFunctions step={step} setStep={setStep} />*/}
         <ConnectWallet step={step} setStep={setStep} selectedValues={selectedValues} setSelectedValues={setSelectedValues} />
         {step === "1"  && ( <Settings  selectedValues={selectedValues} setSelectedValues={setSelectedValues} /> )}
         {step === "2"  && ( <SwaptoETH selectedValues={selectedValues} setSelectedValues={setSelectedValues}/> )}
