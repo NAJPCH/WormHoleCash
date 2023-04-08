@@ -1,18 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useEth from "../../contexts/EthContext/useEth";
 import { Button, Progress, Grid, GridItem, Center } from "@chakra-ui/react";
-import useToastManager from "./useToastManager"; // Importez le custom hook ici
+import useToastManager from "./useToastManager"; 
 import { ChevronRightIcon } from '@chakra-ui/icons'
 
 const Step = ({step, setStep}) => {
     const { state: { contract , accounts, txhash, web3} } = useEth();
     const [newEvents, setNewEvents] = useState([]);
-    //const toast = useToast();
-
-    const getCurrentStep = async () => {
-        const currentStep = await contract.methods.getCurrentStep().call({ from: accounts[0] });
-        setStep(currentStep);
-    };
 
     const { showToast, showToastForTransaction } = useToastManager(); 
 
@@ -21,47 +15,54 @@ const Step = ({step, setStep}) => {
         showToastForTransaction(transactionPromise, (result) => {}, (error) => {});
     };
 
+    const getCurrentStep = useCallback(async () => {
+        const currentStep = await contract.methods.getCurrentStep().call({ from: accounts[0] });
+        setStep(currentStep);
+    }, [contract, accounts]);
+
     useEffect(() => {
+        // Initialisation de l'étape
+        getCurrentStep();
+    }, [getCurrentStep]);
+
+    useEffect(() => {
+        // Gestion des événements
         async function getPastEvent() {
-        if (!txhash) {
-            return;
-        }
-    
-        const deployTx = await web3.eth.getTransaction(txhash);
-        const results = await contract.getPastEvents("StepChanged", {
-            fromBlock: deployTx.blockNumber,
-            toBlock: "latest",
-            filter: { user: accounts[0] }, // Filter by user
-        });
+            if (!txhash) {
+                return;
+            }
         
-        const pastWorkflowEvents = results.map((workflowEvent) => {
-            let pastE = {previousStatus: null, newStatus: null};
-            pastE.previousStatus = workflowEvent.returnValues.previousStatus;
-            pastE.newStatus = workflowEvent.returnValues.newStatus;
-            return pastE;
-        });
-        setNewEvents(pastWorkflowEvents);
-    }
-    getPastEvent();
-
-    contract.events
-        .StepChanged({ fromBlock: "latest", filter: { user: accounts[0] } })
-        .on("data", (event) => {
-            let newEvent = {previousStatus: null, newStatus: null};
-            newEvent.previousStatus = event.returnValues.previousStatus;
-            newEvent.newStatus = event.returnValues.newStatus;
+            const deployTx = await web3.eth.getTransaction(txhash);
+            const results = await contract.getPastEvents("StepChanged", {
+                fromBlock: deployTx.blockNumber,
+                toBlock: "latest",
+                filter: { user: accounts[0] },
+            });
             
-            let events = newEvents;
-            events.push(newEvent);
-            setNewEvents(events)
-            console.log(newEvents);
+            const pastWorkflowEvents = results.map((workflowEvent) => {
+                let pastE = {previousStatus: null, newStatus: null};
+                pastE.previousStatus = workflowEvent.returnValues.previousStatus;
+                pastE.newStatus = workflowEvent.returnValues.newStatus;
+                return pastE;
+            });
+            setNewEvents(pastWorkflowEvents);
+        }
+        getPastEvent();
 
-            getCurrentStep();
-            showToast('success', 'Transaction réussie');
-        });
-    }, [contract, accounts, txhash, web3, getCurrentStep]);
+        contract.events
+            .StepChanged({ fromBlock: "latest", filter: { user: accounts[0] } })
+            .on("data", (event) => {
+                let newEvent = {previousStatus: null, newStatus: null};
+                newEvent.previousStatus = event.returnValues.previousStatus;
+                newEvent.newStatus = event.returnValues.newStatus;
+                
+                let events = newEvents;
+                events.push(newEvent);
+                setNewEvents(events);
 
-    getCurrentStep();
+                getCurrentStep();
+            });
+    }, [contract, accounts, txhash, web3]);
 
     return (
         <div> 

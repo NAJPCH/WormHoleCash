@@ -1,7 +1,7 @@
 import useEth from "../../contexts/EthContext/useEth";
 import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Text } from '@chakra-ui/react';
 
-const WithdrawMixer = ({}) => {
+const WithdrawMixer = () => {
     const { state: { contract , accounts } } = useEth();
 
 

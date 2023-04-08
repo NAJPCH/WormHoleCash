@@ -9,6 +9,8 @@ import Settings from "./Settings";
 import SwaptoETH from "./SwaptoETH"
 import DepositMixer from "./DepositMixer";
 import WithdrawMixer from "./WithdrawMixer";
+/*import SwaptoToken from "./SwaptoToken"
+import Done from "./Done"*/
 
 
 import { Center, Card, CardBody, Heading, Box  } from '@chakra-ui/react'
@@ -52,11 +54,6 @@ function Main() {
     }
   }, ); // [contract, account]
 
-
-
-
-
-
   const main =
           <div>
             <Step step={step} setStep={setStep} />
@@ -80,11 +77,13 @@ function Main() {
           </Card>
         </Center>
         
-        <Selection account={account} setAccount={setAccount} step={step} setStep={setStep} selectedValues={selectedValues} setSelectedValues={setSelectedValues} />
-        {step === "1"  && ( <Settings account={account} setAccount={setAccount} selectedValues={selectedValues} setSelectedValues={setSelectedValues} /> )}
-        {step === "2"  && ( <SwaptoETH userData={userData} selectedValues={selectedValues} setSelectedValues={setSelectedValues}/> )}
+        <Selection account={account} setAccount={setAccount} step={step} setStep={setStep} userData={userData} setUserData={setUserData} selectedValues={selectedValues} setSelectedValues={setSelectedValues} />
+        {step === "1"  && ( <Settings userData={userData} account={account} setAccount={setAccount} /> )}
+        {step === "2"  && ( <SwaptoETH userData={userData} /> )}
         {step === "3"  && ( <DepositMixer/> )}
         {step === "4"  && ( <WithdrawMixer/> )}
+        {/*step === "5"  && ( <SwaptoToken userData={/*userData} /> )}
+        {/*step === "6"  && ( <Done/> )*/}
       </div>;
 
 

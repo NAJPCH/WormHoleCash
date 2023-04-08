@@ -28,7 +28,7 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
       "type": "function"
     },
   ];
-  const SwaptoETH = ({ userData }) => {
+  const SwaptoToken = ({ userData, selectedValues, setSelectedValues }) => {
     const { state: { contract , accounts, web3} } = useEth();
     const [amount, setAmount] = useState('');
     const [Price, setPrice] = useState('');
@@ -43,9 +43,7 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
       getLatestPrice();
     }, []);
 
-    const Swap = async e => { 
-      const newAmountInWei = web3.utils.toWei(amount, 'ether'); //Will be soon replace by Chainlink getDecimals function
-      await contract.methods.Swap(newAmountInWei, userData.tokenList[0].Token).send({ from: accounts[0] }); }; // For Demo purposes only
+    const SwapBack = async e => { await contract.methods.SwapBack(amount, userData.tokenList[0].Token).send({ from: accounts[0] }); };
 
     const getLatestPrice = async () => {
         try {
@@ -75,16 +73,16 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
             <CardBody>
                 <Stack divider={<StackDivider />} spacing='2'>
                 <Box>
-                    <Heading size='xs' textTransform='uppercase'>Swap to ETH</Heading>
+                    <Heading size='xs' textTransform='uppercase'>Swap to Token</Heading>
                     <Stack spacing={4}>
                     <InputGroup size='sm'>
-                        <InputLeftAddon width='60px' children='LINK' />
-                        <Input  type='F' onChange={handleAmountChange} placeholder='' />
-                    </InputGroup>
-                    {/**isDisabled={isApproved} */}
-                    <InputGroup size='sm'>
                         <InputLeftAddon width='60px' children='ETH' />
-                        <Input isDisabled  placeholder='' value={ amount * Price/10**18 }/>
+                        <Input type='F' onChange={handleAmountChange} placeholder='' />
+                    </InputGroup>
+
+                    <InputGroup size='sm'>
+                        <InputLeftAddon width='60px' children='Token' />
+                        <Input isDisabled  placeholder='' value={ amount * 1/Price/10**22 }/>
                     </InputGroup>
                     </Stack>
                     <Text textAlign="right" as="i" pt="2" fontSize="sm" fontFamily="sans-serif">
@@ -93,22 +91,20 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
                 </Box>
                 <Box>
                     <Center>
-                        { isApproved ? (
-                            <Button colorScheme='green' onClick={Swap}>Swap</Button>
-                        ) : (
+                            <Button colorScheme='green' onClick={SwapBack}>SwapBack</Button>
+                        
                             <Button colorScheme='blue' onClick={async () => {
                                 const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
                                 await approveToken(userData.tokenList[0].Token, amountInWei);
-                                setIsApproved(true); // ici remplacer par un event qui change l'etat
+                                setIsApproved(true); // ici remplacer par un event qui change ça
                               }} > Approve
                             </Button>
-                        )}
                     </Center>
                 </Box>
                 <Box>
-                    {/*userData && (
+                    <p>Debug: approveToken:{selectedValues[0]}</p>
+                    {userData && (
                         <div>
-                          <p>Solde : {userData.tokenBalance} LINK</p>
                           <p>Output Address: {userData.outputAddress}</p>
                           <p>Deposit Start Time: {userData.depositStartTime}</p>
                           <p>Step: {Steps[userData.step]}</p>
@@ -116,7 +112,7 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
                               <p key={index}> Token: {token.Token} | State: {token.State} </p>
                             ))}
                         </div>
-                      )*/}
+                      )}
                 </Box>
 
                 </Stack>
@@ -125,6 +121,4 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
     );
 };
 
-export default SwaptoETH;
-
-
+export default SwaptoToken;

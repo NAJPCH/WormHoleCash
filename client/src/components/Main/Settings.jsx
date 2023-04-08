@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Web3 from 'web3';
+//import Web3 from 'web3';
 import useEth from "../../contexts/EthContext/useEth";
-import { Input, Stack, InputGroup, InputLeftAddon, ListItem, UnorderedList, Switch, Center } from '@chakra-ui/react';
-import { Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
+import { Input, Stack, InputGroup, InputLeftAddon, Center, Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
 import useToastManager from "./useToastManager"; 
 
 const TOKEN_ADDRESSES = {
@@ -11,15 +10,14 @@ const TOKEN_ADDRESSES = {
   '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6': 'WETH',
 };
 
-const Settings = ({account, selectedValues, setSelectedValues}) => {
-  const [web3, setWeb3] = useState(null);
+const Settings = ({account}) => {
+  //const [web3, setWeb3] = useState(null);
   //const [account, setAccount] = useState('');
-  const [tokenBalances, setTokenBalances] = useState({});
+  //const [tokenBalances, setTokenBalances] = useState({});
   //const { state: { contract , accounts, txhash, web3} } = useEth();
-  const [tokenListedEvents, setTokenListedEvents] = useState([]);
+  //const [tokenListedEvents, setTokenListedEvents] = useState([]);
 
   const [destinationAddress, setDestinationAddress] = useState('');
-  const [Amount, setAmount] = useState('');
 
   const {
     state: { contract, accounts },
@@ -33,24 +31,10 @@ const Settings = ({account, selectedValues, setSelectedValues}) => {
     showToastForTransaction(transactionPromise, (result) => {}, (error) => {});
   };
 
-  const handleChange = (e) => {
-    const { value, checked } = e.target;
-    if (checked) {
-      setSelectedValues([...selectedValues, value]);
-    } else {
-      setSelectedValues(selectedValues.filter((item) => item !== value));
-    }
-  };
-
   const handleDestinationAddressChange = (e) => {
     setDestinationAddress(e.target.value);
   };
 
-  const handleAmountChange = (e) => {   //pas utilisé ?
-    setAmount(e.target.value); 
-  };
-
-  //Mutual useEffect    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   
   return (
       <Center>
@@ -71,10 +55,8 @@ const Settings = ({account, selectedValues, setSelectedValues}) => {
                   <Input type='F'onChange={handleDestinationAddressChange}  placeholder='Put your destination address here' />
                 </InputGroup>
               </Stack>
+              <Text pt='2' fontSize='sm'>0x55Bf2B89FC54F9328C27d75bc2E31046EFFa2d36</Text>
               <Text as='i' color='tomato' pt='2' fontSize='sm'>Must be out of any link from your current address</Text>
-            </Box>
-            <Box>
-            <p>ici le temps min de mix</p>
             </Box>
             <Box>
             <Center><Button onClick={Settings}>Settings Done</Button></Center>

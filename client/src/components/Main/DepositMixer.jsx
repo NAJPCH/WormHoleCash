@@ -1,7 +1,7 @@
 import useEth from "../../contexts/EthContext/useEth";
 import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Text } from '@chakra-ui/react';
 
-const DepositMixer = ({}) => {
+const DepositMixer = () => {
     const { state: { contract , accounts } } = useEth();
 
 
@@ -12,7 +12,7 @@ const DepositMixer = ({}) => {
             <CardBody>
                 <Stack divider={<StackDivider />} spacing='2'>
                 <Box>
-                    <Text as='i' color='tomato' pt='2' fontSize='sm'>This feature is not available at this time, please proceed to the next step</Text>
+                    <Text as='i' color='tomato' pt='2' fontSize='sm'>Comming soon. This feature is not available at this time, please proceed to the next step</Text>
                 </Box>
 
                 <Box>

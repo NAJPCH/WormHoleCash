@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import useEth from "../../contexts/EthContext/useEth";
-import { Input, Stack, InputGroup, InputLeftAddon, ListItem, UnorderedList, Switch, Center } from '@chakra-ui/react';
-import { Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
+import { Stack, ListItem, UnorderedList, Switch, Center , Card, CardBody, Heading, Box, Text, StackDivider, Button  } from '@chakra-ui/react'
 import useToastManager from "./useToastManager"; // Importez le custom hook dans vos autres composants
 
 
@@ -31,7 +30,7 @@ const Selection = ({account, setAccount, step, setStep, selectedValues, setSelec
   //const [account, setAccount] = useState('');
   const [tokenBalances, setTokenBalances] = useState({});
   //const { state: { contract , accounts, txhash, web3} } = useEth();
-  const [tokenListedEvents, setTokenListedEvents] = useState([]);
+   const [tokenListedEvents, setTokenListedEvents] = useState([]);
   
 
 
@@ -47,6 +46,7 @@ const Selection = ({account, setAccount, step, setStep, selectedValues, setSelec
 
   const Selection = async => {
     const transactionPromise = contract.methods.Selection(selectedValues.join(', ')).send({ from: accounts[0] });
+    //const transactionPromise = contract.methods.Selection(purposes).send({ from: accounts[0] });
     showToastForTransaction(transactionPromise, (result) => { console.log("TX OK");}, (error) => { console.log("TX KO");});
   };
 
@@ -99,103 +99,16 @@ const Selection = ({account, setAccount, step, setStep, selectedValues, setSelec
     }
   };
 
-  const handleDestinationAddressChange = (e) => {
+  /*const handleDestinationAddressChange = (e) => {
     setDestinationAddress(e.target.value);
   };
 
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
-  };
+  };*/
 
-  /*  FOR DEBUG ONLY //--------------------------------------------
-
-  useEffect(() => {
-    if (contract) {
-      const tokenListedEvent = contract.events.TokenListed({}, (error, event) => {
-        if (error) {
-          console.error('Error on TokenListed event:', error);
-        } else {
-          setTokenListedEvents((events) => [...events, event]);
-        }
-      });
-  
-      return () => {
-        tokenListedEvent.unsubscribe();
-      };
-    }
-  }, [contract]);
-  
-  const fetchPastTokenListedEvents = async () => {
-    if (contract) {
-      try {
-        const events = await contract.getPastEvents('TokenListed', {
-          fromBlock: 0,
-          toBlock: 'latest',
-        });
-  
-        setTokenListedEvents(events);
-      } catch (error) {
-        console.error('Error fetching past TokenListed events:', error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchPastTokenListedEvents();
-  }, [contract]);
-  */ //--------------------------------------------
- 
   return (
     <div>
-       {/*<Center>
-          <Card maxW='md' minW='800px' bg='gray'>
-            <CardBody>
-              <Stack divider={<StackDivider />} spacing='2'>
-                <Box>  FOR DEBUG ONLY
-                  <Heading size='xs' textTransform='uppercase'>DEBUG TokenListed Events</Heading>
-                  <div>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Event ID</th>
-                        <th>Token Address</th>
-                        <th>Token State</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tokenListedEvents.map((event, index) => (
-                        <tr key={index}>
-                          <td>{index}</td>
-                          <td>{event.returnValues.tokenSelected.Token.substring(0, 5)}...${event.returnValues.tokenSelected.Token.slice(-3)}</td>
-                          <td>{event.returnValues.tokenSelected.State}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  </div>
-                </Box>
-                <Box>
-                  <Heading size="xs" >USER DATA</Heading>
-                  {userData && (
-                    <div>
-                      <p>Output Address: {userData.outputAddress}</p>
-                      <p>Deposit Start Time: {userData.depositStartTime}</p>
-                      <p>Step: {Steps[userData.step]}</p>
-                      <ul>
-                        {userData.tokenList.map((token, index) => (
-                          <li key={index}>
-                            Token: {token.Token} | State: {token.State}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </Box>
-              </Stack>
-            </CardBody>
-      </Card>
-    </Center>*/}
-
       {step === "0"  && (  
         <Center>
         <Card maxW='md' minW='500px'>
@@ -215,7 +128,7 @@ const Selection = ({account, setAccount, step, setStep, selectedValues, setSelec
             </Box>
             <Box>
               {<p>Debug Éléments sélectionnés : {selectedValues.join(', ')}</p>}
-              <Center><Button onClick={Selection}>Selection</Button></Center>
+              <Center><Button onClick={Selection}>Selection Done</Button></Center>
             </Box>
 
           </Stack>

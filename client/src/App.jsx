@@ -8,7 +8,6 @@ import React from "react";
 
 function App(){
 
-//backgroundImage="url('https://images.typeform.com/images/U9fg8PdXKZz4/background/large')"
   return (
     
     <EthProvider>
