@@ -33,5 +33,31 @@ This project is based on the Truffle Box React architecture. There is no coverag
 However, a solution exists but has not yet been implemented. 
 (https://hardhat.org/hardhat-runner/plugins/nomiclabs-hardhat-truffle5)
 
+  Contract: WormHoleCash.sol
+    // ::::::::::::: WORM HOLE CACH TESTS ::::::::::::: //
+      Change step Revert Wrong step
+        ✔ Should fail change step to SwapBack (837ms)
+        ✔ Should fail change step to WithdrawMixer (394ms)
+        ✔ Should fail change step to DepositMixer (169ms)
+        ✔ Should fail change step to Swap (174ms)
+        ✔ Should fail change step to Settings (165ms)
+        ✔ Should fail change step to Selection (966ms)
+      Selection tests
+        ✔ getCurrentStep =0 (206ms)
+        ✔ Should fail to set a null address (184ms)
+        ✔ Should event StepChanged (1130ms)
+        ✔ Should event TokenListed (1321ms)
+      Settings tests
+        ✔ getCurrentStep =2 (508ms)
+        ✔ Should fail to set a null address
+        ✔ Should event StepChanged (768ms)
+        ✔ Should event OutputAddressSet (414ms)
+      Swap tests
+        ✔ Should fail to set a null address
+        ✔ Should fail to set a null amount
+        X Should event StepChanged // Not passed, Blocked by approve 
+
+
+
 ## Discord
 https://discord.gg/kBmrEy4r
