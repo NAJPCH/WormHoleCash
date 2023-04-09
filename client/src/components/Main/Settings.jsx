@@ -55,11 +55,11 @@ const Settings = ({account}) => {
                   <Input type='F'onChange={handleDestinationAddressChange}  placeholder='Put your destination address here' />
                 </InputGroup>
               </Stack>
-              <Text pt='2' fontSize='sm'>0x55Bf2B89FC54F9328C27d75bc2E31046EFFa2d36</Text>
+              <Text pt='2' fontSize='sm'>Minimum mixing time: 1min (DEMO)</Text>
               <Text as='i' color='tomato' pt='2' fontSize='sm'>Must be out of any link from your current address</Text>
             </Box>
             <Box>
-            <Center><Button onClick={Settings}>Settings Done</Button></Center>
+              <Center><Button onClick={Settings}>Settings Done</Button></Center>
             </Box>
 
           </Stack>

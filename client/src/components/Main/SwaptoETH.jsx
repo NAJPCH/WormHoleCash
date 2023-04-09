@@ -45,7 +45,12 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
 
     const Swap = async e => { 
       const newAmountInWei = web3.utils.toWei(amount, 'ether'); //Will be soon replace by Chainlink getDecimals function
-      await contract.methods.Swap(newAmountInWei, userData.tokenList[0].Token).send({ from: accounts[0] }); }; // For Demo purposes only
+      //console.log(newAmountInWei);
+      //console.log(userData.userTokenList[0].Token);
+      //await contract.methods.Swap(newAmountInWei, userData.userTokenList[0].Token).send({ from: accounts[0] });  // For Demo purposes only
+      await contract.methods.SwapDemo(newAmountInWei, userData.userTokenList[0].Token).send({ from: accounts[0] });  // For Demo purposes only
+
+    };
 
     const getLatestPrice = async () => {
         try {
@@ -79,9 +84,8 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
                     <Stack spacing={4}>
                     <InputGroup size='sm'>
                         <InputLeftAddon width='60px' children='LINK' />
-                        <Input  type='F' onChange={handleAmountChange} placeholder='' />
+                        <Input isDisabled={isApproved} type='F' onChange={handleAmountChange} placeholder='' />
                     </InputGroup>
-                    {/**isDisabled={isApproved} */}
                     <InputGroup size='sm'>
                         <InputLeftAddon width='60px' children='ETH' />
                         <Input isDisabled  placeholder='' value={ amount * Price/10**18 }/>
@@ -98,25 +102,12 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
                         ) : (
                             <Button colorScheme='blue' onClick={async () => {
                                 const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
-                                await approveToken(userData.tokenList[0].Token, amountInWei);
+                                await approveToken(userData.userTokenList[0].Token, amountInWei);
                                 setIsApproved(true); // ici remplacer par un event qui change l'etat
                               }} > Approve
                             </Button>
                         )}
                     </Center>
-                </Box>
-                <Box>
-                    {/*userData && (
-                        <div>
-                          <p>Solde : {userData.tokenBalance} LINK</p>
-                          <p>Output Address: {userData.outputAddress}</p>
-                          <p>Deposit Start Time: {userData.depositStartTime}</p>
-                          <p>Step: {Steps[userData.step]}</p>
-                            {userData.tokenList.map((token, index) => (
-                              <p key={index}> Token: {token.Token} | State: {token.State} </p>
-                            ))}
-                        </div>
-                      )*/}
                 </Box>
 
                 </Stack>

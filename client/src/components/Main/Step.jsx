@@ -77,7 +77,7 @@ const Step = ({step, setStep}) => {
                 <GridItem w='100%' h='10' ><ChevronRightIcon />Swap back</GridItem>
                 <GridItem w='100%' h='10' ><ChevronRightIcon />Done</GridItem>
             </Grid>
-            <Button colorScheme='red' onClick={reset}>Debug Reset</Button>
+            <Button colorScheme='red' onClick={reset}>Demo Reset</Button>
         </div>     
 );
 };

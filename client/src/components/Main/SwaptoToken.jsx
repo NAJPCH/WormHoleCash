@@ -28,7 +28,7 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
       "type": "function"
     },
   ];
-  const SwaptoToken = ({ userData, selectedValues, setSelectedValues }) => {
+  const SwaptoToken = ({ userData }) => {
     const { state: { contract , accounts, web3} } = useEth();
     const [amount, setAmount] = useState('');
     const [Price, setPrice] = useState('');
@@ -43,7 +43,7 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
       getLatestPrice();
     }, []);
 
-    const SwapBack = async e => { await contract.methods.SwapBack(amount, userData.tokenList[0].Token).send({ from: accounts[0] }); };
+    const SwapBack = async e => { await contract.methods.SwapBack(amount, userData.userTokenList[0].Token).send({ from: accounts[0] }); };
 
     const getLatestPrice = async () => {
         try {
@@ -91,30 +91,19 @@ import { Button, Center, Card, CardBody, Stack, StackDivider, Box, Heading, Inpu
                 </Box>
                 <Box>
                     <Center>
+
+                    { isApproved ? (
                             <Button colorScheme='green' onClick={SwapBack}>SwapBack</Button>
-                        
+                            ) : (
                             <Button colorScheme='blue' onClick={async () => {
                                 const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
-                                await approveToken(userData.tokenList[0].Token, amountInWei);
+                                await approveToken(userData.userTokenList[0].Token, amountInWei);
                                 setIsApproved(true); // ici remplacer par un event qui change ça
                               }} > Approve
                             </Button>
+                            )}
                     </Center>
                 </Box>
-                <Box>
-                    <p>Debug: approveToken:{selectedValues[0]}</p>
-                    {userData && (
-                        <div>
-                          <p>Output Address: {userData.outputAddress}</p>
-                          <p>Deposit Start Time: {userData.depositStartTime}</p>
-                          <p>Step: {Steps[userData.step]}</p>
-                            {userData.tokenList.map((token, index) => (
-                              <p key={index}> Token: {token.Token} | State: {token.State} </p>
-                            ))}
-                        </div>
-                      )}
-                </Box>
-
                 </Stack>
             </CardBody>
         </Card></Center>

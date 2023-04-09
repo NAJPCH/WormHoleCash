@@ -14,7 +14,7 @@ function Footer() {
       <Flex h='10'>
         <Stack spacing={0}>
           <Link uri={"https://github.com/NAJPCH/WormHoleCash"} text={"GitHub"} />
-          <Link uri={"https://whc-1.gitbook.io/whc1/overview/comment-sa-fonctionne"} text={"GitBook"} />
+          <Link uri={"https://whc-1.gitbook.io/whc1/overview/comment-sa-fonctionne"} text={"DOCS"} />
         </Stack>
         <Spacer />
         <Stack spacing={0}>

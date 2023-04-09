@@ -9,8 +9,8 @@ import Settings from "./Settings";
 import SwaptoETH from "./SwaptoETH"
 import DepositMixer from "./DepositMixer";
 import WithdrawMixer from "./WithdrawMixer";
-/*import SwaptoToken from "./SwaptoToken"
-import Done from "./Done"*/
+import SwaptoToken from "./SwaptoToken"
+import Done from "./Done"
 
 
 import { Center, Card, CardBody, Heading, Box  } from '@chakra-ui/react'
@@ -37,10 +37,11 @@ function Main() {
     6: "Done",
   };
   
+  
   const fetchUserData = async () => {
     if (contract && account) {
       try {
-        const userData = await contract.methods.getUserData(account).call();
+        const userData = await contract.methods.getUserData(account).call({ from: accounts[0] });
         setUserData(userData);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -57,34 +58,14 @@ function Main() {
   const main =
           <div>
             <Step step={step} setStep={setStep} />
-            <Center>
-              <Card maxW='md' minW='800px' bg='gray'>
-                <CardBody>
-                    <Box>
-                      <Heading size="xs" >USER DATA</Heading>
-                      {userData && (
-                        <div>
-                          <p>Output Address: {userData.outputAddress}</p>
-                          <p>Deposit Start Time: {userData.depositStartTime}</p>
-                          <p>Step: {Steps[userData.step]}</p>
-                            {userData.tokenList.map((token, index) => (
-                              <p key={index}> Token: {token.Token} | State: {token.State} </p>
-                            ))}
-                        </div>
-                      )}
-                    </Box>
-                </CardBody>
-          </Card>
-        </Center>
-        
-        <Selection account={account} setAccount={setAccount} step={step} setStep={setStep} userData={userData} setUserData={setUserData} selectedValues={selectedValues} setSelectedValues={setSelectedValues} />
-        {step === "1"  && ( <Settings userData={userData} account={account} setAccount={setAccount} /> )}
-        {step === "2"  && ( <SwaptoETH userData={userData} /> )}
-        {step === "3"  && ( <DepositMixer/> )}
-        {step === "4"  && ( <WithdrawMixer/> )}
-        {/*step === "5"  && ( <SwaptoToken userData={/*userData} /> )}
-        {/*step === "6"  && ( <Done/> )*/}
-      </div>;
+            <Selection account={account} setAccount={setAccount} step={step} setStep={setStep} userData={userData} setUserData={setUserData} selectedValues={selectedValues} setSelectedValues={setSelectedValues} />
+            {step === "1"  && ( <Settings userData={userData} account={account} setAccount={setAccount} /> )}
+            {step === "2"  && ( <SwaptoETH userData={userData} /> )}
+            {step === "3"  && ( <DepositMixer/> )}
+            {step === "4"  && ( <WithdrawMixer/> )}
+            {step === "5"  && ( <SwaptoToken userData={userData} /> )}
+            {step === "6"  && ( <Done/> )}
+          </div>;
 
 
   return (

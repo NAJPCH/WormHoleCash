@@ -27,15 +27,12 @@ const TOKEN_ADDRESSES = {
 
 const Selection = ({account, setAccount, step, setStep, selectedValues, setSelectedValues}) => {
   const [web3, setWeb3] = useState(null);
-  //const [account, setAccount] = useState('');
   const [tokenBalances, setTokenBalances] = useState({});
+  //const [tokenListedEvents, setTokenListedEvents] = useState([]);
+  //const [account, setAccount] = useState('');
   //const { state: { contract , accounts, txhash, web3} } = useEth();
-   const [tokenListedEvents, setTokenListedEvents] = useState([]);
-  
-
-
-  const [destinationAddress, setDestinationAddress] = useState('');
-  const [Amount, setAmount] = useState('');
+  //const [destinationAddress, setDestinationAddress] = useState('');
+  //const [Amount, setAmount] = useState('');
 
   const {
     state: { contract, accounts },
@@ -99,14 +96,6 @@ const Selection = ({account, setAccount, step, setStep, selectedValues, setSelec
     }
   };
 
-  /*const handleDestinationAddressChange = (e) => {
-    setDestinationAddress(e.target.value);
-  };
-
-  const handleAmountChange = (e) => {
-    setAmount(e.target.value);
-  };*/
-
   return (
     <div>
       {step === "0"  && (  
@@ -127,7 +116,7 @@ const Selection = ({account, setAccount, step, setStep, selectedValues, setSelec
                       </UnorderedList>
             </Box>
             <Box>
-              {<p>Debug Éléments sélectionnés : {selectedValues.join(', ')}</p>}
+              {/*<p>Debug Éléments sélectionnés : {selectedValues.join(', ')}</p>*/}
               <Center><Button onClick={Selection}>Selection Done</Button></Center>
             </Box>
 
