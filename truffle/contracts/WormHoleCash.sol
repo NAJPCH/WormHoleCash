@@ -47,7 +47,7 @@ interface ISwapRouter {
 
 contract WormHoleCash is ReentrancyGuard {
     ISwapRouter public immutable swapRouter;
-    AggregatorV3Interface internal priceFeed;
+    //AggregatorV3Interface internal priceFeed;
     /// @dev bollean against the reentrancy attack
     bool private isInProgress;
 
@@ -69,10 +69,15 @@ contract WormHoleCash is ReentrancyGuard {
     mapping(address => UserData) private usersData;
     mapping(address => Steps) private userSteps;
 
-    address public constant SwapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+    /*address public constant SwapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address public constant WETH9 = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
     address public constant DAI = 0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844;
-    address public constant LINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address public constant LINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;*/
+    address public immutable SwapRouterV3;
+    address public immutable WETH9;
+    address public immutable DAI;
+    address public immutable LINK;
+    AggregatorV3Interface public priceFeed;
 
     address public OuputAddress;
     uint public mixingDuration = 1 minutes; // Only for Demo
@@ -110,10 +115,25 @@ contract WormHoleCash is ReentrancyGuard {
     /// @dev Event Emitted whe this Smart Contract reveive ETH
     event Received(address, uint);
  
-    constructor() {
+    /*constructor() {
         swapRouter = ISwapRouter(SwapRouterV3);
         priceFeed = AggregatorV3Interface(  0xb4c4a493AB6356497713A78FFA6c60FB53517c63 );
-    }
+    }*/
+    constructor(address _swapRouterV3, address _weth9, address _dai, address _link, address _priceFeed) {
+    require(_swapRouterV3 != address(0), "SwapRouterV3 address cannot be null");
+    require(_weth9 != address(0), "WETH9 address cannot be null");
+    require(_dai != address(0), "DAI address cannot be null");
+    require(_link != address(0), "LINK address cannot be null");
+    require(_priceFeed != address(0), "PriceFeed address cannot be null");
+
+
+    SwapRouterV3 = _swapRouterV3;
+    swapRouter = ISwapRouter(SwapRouterV3);
+    WETH9 = _weth9;
+    DAI = _dai;
+    LINK = _link;
+    priceFeed = AggregatorV3Interface(_priceFeed);
+}
 
     //------------------------------------------------------------------ MODIFIERS
     /// @dev Modifier to check to protect against reentrancy attacks
