@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-//import { useState } from "react";
 import useEth from "../../contexts/EthContext/useEth";
 import Step from "./Step";
 import NoticeNoArtifact from "./NoticeNoArtifact";
@@ -13,7 +12,6 @@ import SwaptoToken from "./SwaptoToken"
 import Done from "./Done"
 
 
-import { Center, Card, CardBody, Heading, Box  } from '@chakra-ui/react'
 
 function Main() {
   const { state } = useEth();
