@@ -1,35 +1,7 @@
-/*
-const HDWalletProvider = require('truffle-hdwallet-provider');
-const Web3 = require('web3');
-const compiledContract = require('./build/MyContract.json');
-
-const provider = new HDWalletProvider(
-  'seed mnemonic',
-  'https://rinkeby.infura.io/v3/your-project-id'
-);
-
-const web3 = new Web3(provider);
-
-const deploy = async () => {
-
-  const accounts = await web3.eth.getAccounts();
-  console.log('Déploiement du contrat à partir du compte', accounts[0]);
-    const result = await new web3.eth.Contract(
-    JSON.parse(compiledContract.interface)
-  )
-    .deploy({ data: '0x' + compiledContract.bytecode })
-    .send({ gas: '1000000', from: accounts[0] });
-
-  console.log('Adresse du contrat déployé :', result.options.address);
-};
-
-deploy();*/
-
 const WormHoleCash = artifacts.require("WormHoleCash");
 const { BN, expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 const constants = require('@openzeppelin/test-helpers/src/constants'); 
-//const ERC20 = artifacts.require("node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol");
 const ERC20 = artifacts.require("IERC20");
 
 contract("WormHoleCash", accounts => {
@@ -37,14 +9,21 @@ contract("WormHoleCash", accounts => {
   const user2 = accounts[1];
   const LINK = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
   const nullAddress = "0x0000000000000000000000000000000000000000";
+
+  const swapRouterV3Address = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
+  const weth9Address = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
+  const daiAddress = "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844";
+  const linkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+  const priceFeedAddress = "0xb4c4a493AB6356497713A78FFA6c60FB53517c63"; 
+
   
   let WHCInstance;
   context('// ::::::::::::: WORM HOLE CACH TESTS ::::::::::::: //', function() {
     describe('Change step Revert Wrong step', function() {
 
       beforeEach(async function () {
-        WHCInstance = await WormHoleCash.new({from: user1});
-      })
+        WHCInstance = await WormHoleCash.new(swapRouterV3Address, weth9Address, daiAddress, linkAddress, priceFeedAddress, {from: user1} );
+        })
 
       it('Should fail change step to SwapBack', async () => {
         await expectRevert(WHCInstance.SwapBack(1,user2, {from: user1}), "Wrong step");
@@ -77,7 +56,7 @@ contract("WormHoleCash", accounts => {
     describe('Selection tests', function() {
       
       beforeEach(async function () {
-        WHCInstance = await WormHoleCash.new({from: user1});
+        WHCInstance = await WormHoleCash.new(swapRouterV3Address, weth9Address, daiAddress, linkAddress, priceFeedAddress, {from: user1} );
       })
 
       it('getCurrentStep =0', async () => {
@@ -110,7 +89,7 @@ contract("WormHoleCash", accounts => {
     describe('Settings tests', function() {
       
       beforeEach(async function () {
-        WHCInstance = await WormHoleCash.new({from: user1});
+        WHCInstance = await WormHoleCash.new(swapRouterV3Address, weth9Address, daiAddress, linkAddress, priceFeedAddress, {from: user1} );
         await WHCInstance.Selection(LINK, {from: user1});
       })
 
@@ -138,7 +117,7 @@ contract("WormHoleCash", accounts => {
     describe('Swap tests', function() {
       
       beforeEach(async function () {
-        WHCInstance = await WormHoleCash.new({from: user1});
+        WHCInstance = await WormHoleCash.new(swapRouterV3Address, weth9Address, daiAddress, linkAddress, priceFeedAddress, {from: user1} );
         await WHCInstance.Selection(LINK, {from: user1});
         await WHCInstance.Settings(user2, {from: user1});
       })  
